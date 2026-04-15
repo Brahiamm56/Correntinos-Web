@@ -364,7 +364,7 @@ export default function HeroScene() {
             className="block will-change-transform"
             style={{ opacity: 0 }}
           >
-            Corrientes
+            Correntinos
           </span>
           <span
             ref={titleLine2Ref}
