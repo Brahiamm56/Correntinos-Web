@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import AnimatedSection from "@/components/AnimatedSection";
 
 export const metadata: Metadata = {

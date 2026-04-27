@@ -52,7 +52,7 @@ export default function NotFound() {
               Volver al inicio
             </Link>
             <Link
-              href="/blog"
+              href="/noticias"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-full border-2 border-white/25 text-white hover:bg-white/10 transition-all duration-300 hover:-translate-y-1"
             >
               Ver noticias →

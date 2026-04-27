@@ -6,36 +6,28 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 const impactAreas = [
   {
-    icon: "🌿",
-    title: "Conservación",
+    icon: "💡",
+    title: "Concientización",
     description:
-      "Protegemos los ecosistemas únicos de Corrientes, desde los Esteros del Iberá hasta los bosques nativos del interior provincial.",
-    image: "/hero-bg.png",
-    color: "#2D7A4F",
-  },
-  {
-    icon: "📚",
-    title: "Educación Ambiental",
-    description:
-      "Llevamos programas de concientización a escuelas rurales y urbanas, formando una generación comprometida con el planeta.",
+      "No se puede proteger lo que no se conoce. Por eso, promovemos la educación ambiental y desarrollamos campañas que buscan informar, sensibilizar y generar una conciencia crítica sobre la crisis climática.",
     image: "/education-bg.png",
     color: "#E8B931",
   },
   {
-    icon: "🔬",
-    title: "Investigación",
-    description:
-      "Generamos datos e informes técnicos que sirven como base para políticas públicas basadas en evidencia científica.",
-    image: "/research-bg.png",
-    color: "#1A5C3A",
-  },
-  {
     icon: "🤝",
-    title: "Acción Comunitaria",
+    title: "Participación ciudadana",
     description:
-      "Trabajamos junto a comunidades locales en proyectos de adaptación al cambio climático y desarrollo sustentable.",
+      "El ambiente es nuestra casa común y su cuidado es una responsabilidad colectiva. A través de programas de voluntariado, impulsamos que más personas se involucren y se conviertan en agentes activos de cambio.",
     image: "/community-bg.png",
     color: "#4CAF6E",
+  },
+  {
+    icon: "⚡",
+    title: "Acción climática",
+    description:
+      "La respuesta a la crisis ambiental es necesariamente colectiva. Trabajamos para exigir el cumplimiento de las normativas vigentes y promover políticas públicas y leyes que garanticen la protección del ambiente.",
+    image: "/hero-bg.png",
+    color: "#2D7A4F",
   },
 ];
 
@@ -189,11 +181,11 @@ export default function ImpactSection() {
       <div className="section-container relative z-10 py-16 sm:py-24">
         {/* Header */}
         <div ref={headerRef} className="text-center mb-12">
-          <span className="section-label justify-center">Áreas de Impacto</span>
-          <h2 className="mb-4">Lo que hacemos transforma</h2>
+          <span className="section-label justify-center">Nuestros pilares</span>
+          <h2 className="mb-4">Nuestros pilares fundamentales</h2>
           <p className="text-[var(--gris-calido)] max-w-xl mx-auto">
-            Cada área de trabajo es un frente de batalla contra el cambio climático.
-            Juntas, construyen un futuro sustentable para Corrientes.
+            En nuestra fundación entendemos que la acción climática se construye
+            sobre tres ejes clave:
           </p>
         </div>
 

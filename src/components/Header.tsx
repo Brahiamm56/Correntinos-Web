@@ -5,21 +5,26 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
+import { useCartStore } from "@/store/cart";
+import { ShoppingCart, User } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Inicio" },
   { href: "/quienes-somos", label: "Quiénes Somos" },
-  { href: "/blog", label: "Noticias" },
-  { href: "/trabaja-con-nosotros", label: "Sumate" },
+  { href: "/noticias", label: "Noticias" },
+  { href: "/tienda", label: "Tienda" },
+  { href: "/donaciones", label: "Donaciones" },
   { href: "/contacto", label: "Contacto" },
 ];
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  // Guards against SSR — portals require document
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { user, profile } = useAuthStore();
+  const cartCount = useCartStore((s) => s.getCount());
+  const hideChrome = pathname.startsWith("/admin");
 
   const isHome = pathname === "/";
   const isTransparent = isHome && !scrolled;
@@ -27,13 +32,14 @@ export default function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  useEffect(() => { setMounted(true); }, []);
-
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
-    setScrolled(window.scrollY > 40);
+    const frame = window.requestAnimationFrame(handleScroll);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -41,7 +47,12 @@ export default function Header() {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
-  useEffect(() => { setMenuOpen(false); }, [pathname]);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setMenuOpen(false));
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
+
+  if (hideChrome) return null;
 
   // Both the toggle button and the overlay live in portals at the root
   // stacking context so GSAP compositor layers (will-change:transform on the
@@ -50,7 +61,7 @@ export default function Header() {
   //   z-9990  → overlay (full-screen cream backdrop)
   //   z-9995  → toggle button (always above the overlay)
   //
-  const portals = mounted
+  const portals = typeof document !== "undefined"
     ? createPortal(
         <>
           {/* ── Toggle button (hamburger ↔ X) ──────────────────────────
@@ -262,12 +273,38 @@ export default function Header() {
           </ul>
 
           {/* CTA Desktop */}
-          <Link
-            href="/contacto"
-            className="hidden lg:inline-flex btn-primary text-sm py-2.5 px-5"
-          >
-            Contactanos
-          </Link>
+          <div className="hidden lg:flex items-center gap-2">
+            <Link
+              href="/tienda/carrito"
+              className={`relative p-2.5 rounded-full transition-all duration-300 ${
+                isTransparent ? "text-white/80 hover:text-white hover:bg-white/10" : "text-[var(--gris-medio)] hover:text-[var(--verde-profundo)] hover:bg-[var(--verde-palido)]"
+              }`}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            {user ? (
+              <Link
+                href={profile?.rol === "admin" ? "/admin" : "/perfil"}
+                className={`p-2.5 rounded-full transition-all duration-300 ${
+                  isTransparent ? "text-white/80 hover:text-white hover:bg-white/10" : "text-[var(--gris-medio)] hover:text-[var(--verde-profundo)] hover:bg-[var(--verde-palido)]"
+                }`}
+              >
+                <User className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="btn-primary text-sm py-2.5 px-5"
+              >
+                Ingresar
+              </Link>
+            )}
+          </div>
 
           {/* Placeholder that keeps the header layout balanced on mobile
               (the real button is portalled; this invisible div reserves space) */}

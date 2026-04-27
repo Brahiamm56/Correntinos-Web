@@ -5,17 +5,20 @@ import HeroScene from "@/components/HeroScene";
 import ImpactSection from "@/components/ImpactSection";
 import ParallaxLayer from "@/components/ParallaxLayer";
 import StatsCounter from "@/components/StatsCounter";
-import { getAllPosts } from "@/lib/posts";
+import { getNoticiaExcerpt, getPublishedNoticias } from "@/lib/noticias";
 
 const stats = [
-  { value: 500, suffix: "+", label: "Estudiantes alcanzados", icon: "🌱" },
-  { value: 12, suffix: "", label: "Escuelas rurales", icon: "🏫" },
-  { value: 3, suffix: "", label: "Investigaciones activas", icon: "🔬" },
-  { value: 1, suffix: "ra", label: "Fundación climática de Corrientes", icon: "⭐" },
+  { value: 90, suffix: "+", label: "Voluntarios", icon: "🙋" },
+  { value: 1000, suffix: "+", label: "Estudiantes alcanzados", icon: "🌱" },
+  { value: 15, suffix: "+", label: "Programas impulsados", icon: "🚀" },
+  { value: 100, suffix: "+", label: "Emprendedores Sustentables", icon: "�" },
+  { value: 0, suffix: "", label: "Organizadores de la Cumbre Climática de las Juventudes 2022", icon: "🏆", isText: true },
 ];
 
-export default function HomePage() {
-  const latestPosts = getAllPosts().slice(0, 3);
+const fallbackNewsCovers = ["/hero-bg.png", "/education-bg.png", "/research-bg.png"];
+
+export default async function HomePage() {
+  const latestNoticias = await getPublishedNoticias({ limit: 3 });
 
   return (
     <>
@@ -175,7 +178,7 @@ export default function HomePage() {
             </div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {stats.map((stat, i) => (
               <AnimatedSection key={stat.label} delay={i * 120}>
                 <div className="glass-card p-8 text-center flex flex-col items-center gap-4">
@@ -189,10 +192,18 @@ export default function HomePage() {
                     {stat.icon}
                   </div>
                   <div>
-                    <StatsCounter value={stat.value} suffix={stat.suffix} />
-                    <p className="text-sm text-[var(--gris-calido)] mt-1.5 font-medium leading-snug max-w-[12ch] mx-auto">
-                      {stat.label}
-                    </p>
+                    {stat.isText ? (
+                      <p className="text-sm text-[var(--gris-calido)] font-medium leading-snug">
+                        {stat.label}
+                      </p>
+                    ) : (
+                      <>
+                        <StatsCounter value={stat.value} suffix={stat.suffix} />
+                        <p className="text-sm text-[var(--gris-calido)] mt-1.5 font-medium leading-snug max-w-[12ch] mx-auto">
+                          {stat.label}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </AnimatedSection>
@@ -230,63 +241,80 @@ export default function HomePage() {
           </AnimatedSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {latestPosts.map((post, i) => {
-              const cover = post.meta.cover ?? ["/hero-bg.png", "/education-bg.png", "/research-bg.png"][i % 3];
-              return (
-                <AnimatedSection key={post.slug} delay={i * 100}>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="group block relative overflow-hidden rounded-2xl"
-                    style={{ minHeight: 320 }}
-                  >
-                    <Image
-                      src={cover}
-                      alt={post.meta.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      quality={75}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#071f17]/90 via-[#0B3D2E]/35 to-transparent" />
-                    <div className="absolute inset-0 flex flex-col justify-end p-5">
-                      <div className="flex gap-1.5 flex-wrap mb-2">
-                        {post.meta.tags?.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/15 text-white/85 backdrop-blur-sm border border-white/20"
-                          >
-                            {tag}
+            {latestNoticias.length === 0 ? (
+              <AnimatedSection>
+                <div className="md:col-span-3 rounded-[28px] border border-[var(--border)] bg-white/70 px-6 py-12 text-center shadow-[0_24px_80px_rgba(11,61,46,0.08)] backdrop-blur-sm">
+                  <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--verde-hoja)]/70 mb-3">
+                    Noticias en preparación
+                  </p>
+                  <h3 className="text-2xl mb-3">Todavía no hay novedades publicadas</h3>
+                  <p className="text-[var(--gris-calido)] max-w-xl mx-auto">
+                    Las noticias que se publiquen desde el panel de administración aparecerán acá automáticamente.
+                  </p>
+                </div>
+              </AnimatedSection>
+            ) : (
+              latestNoticias.map((noticia, i) => {
+                const cover =
+                  noticia.imagen_url ??
+                  fallbackNewsCovers[i % fallbackNewsCovers.length];
+
+                return (
+                  <AnimatedSection key={noticia.id} delay={i * 100}>
+                    <Link
+                      href={`/noticias/${noticia.id}`}
+                      className="group block relative overflow-hidden rounded-2xl"
+                      style={{ minHeight: 320 }}
+                    >
+                      <Image
+                        src={cover}
+                        alt={noticia.titulo}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        quality={75}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#071f17]/90 via-[#0B3D2E]/35 to-transparent" />
+                      <div className="absolute inset-0 flex flex-col justify-end p-5">
+                        <div className="flex gap-1.5 flex-wrap mb-2">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/15 text-white/85 backdrop-blur-sm border border-white/20">
+                            noticias
                           </span>
-                        ))}
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/15 text-white/85 backdrop-blur-sm border border-white/20">
+                            correntinos
+                          </span>
+                        </div>
+                        <h3 className="!text-white text-base font-bold leading-snug mb-1.5 line-clamp-2">
+                          {noticia.titulo}
+                        </h3>
+                        <p className="text-white/60 text-xs line-clamp-2 mb-3">
+                          {getNoticiaExcerpt(noticia.contenido, 120)}
+                        </p>
+                        <div className="flex items-center justify-between gap-3">
+                          <time className="text-white/45 text-[11px]">
+                            {noticia.fecha_publicacion
+                              ? new Date(noticia.fecha_publicacion).toLocaleDateString("es-AR", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })
+                              : "Sin fecha"}
+                          </time>
+                          <span className="text-[11px] font-semibold text-[var(--dorado)] group-hover:translate-x-0.5 transition-transform duration-300">
+                            Leer →
+                          </span>
+                        </div>
                       </div>
-                      <h3 className="!text-white text-base font-bold leading-snug mb-1.5 line-clamp-2">
-                        {post.meta.title}
-                      </h3>
-                      <p className="text-white/60 text-xs line-clamp-2 mb-3">
-                        {post.meta.excerpt}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <time className="text-white/45 text-[11px]">
-                          {new Date(post.meta.date).toLocaleDateString("es-AR", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </time>
-                        <span className="text-[11px] font-semibold text-[var(--dorado)] group-hover:translate-x-0.5 transition-transform duration-300">
-                          Leer →
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </AnimatedSection>
-              );
-            })}
+                    </Link>
+                  </AnimatedSection>
+                );
+              })
+            )}
           </div>
 
           <AnimatedSection>
             <div className="text-center mt-10">
-              <Link href="/blog" className="btn-secondary">
+              <Link href="/noticias" className="btn-secondary">
                 Ver todas las noticias →
               </Link>
             </div>

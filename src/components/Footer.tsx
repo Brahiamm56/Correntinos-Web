@@ -1,20 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const footerLinks = {
   navegacion: [
     { href: "/", label: "Inicio" },
     { href: "/quienes-somos", label: "Quiénes Somos" },
-    { href: "/blog", label: "Noticias" },
+    { href: "/noticias", label: "Noticias" },
+    { href: "/tienda", label: "Tienda" },
     { href: "/contacto", label: "Contacto" },
   ],
   involucrate: [
+    { href: "/donaciones", label: "Donaciones" },
     { href: "/trabaja-con-nosotros", label: "Trabajá con nosotros" },
     { href: "/contacto", label: "Contactanos" },
   ],
 };
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <footer className="relative bg-[var(--verde-profundo)] text-white/80 overflow-hidden">
       {/* Gradient bridge — adapts to any section color above */}

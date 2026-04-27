@@ -380,9 +380,11 @@ export default function HeroScene() {
           className="text-lg sm:text-xl text-white/75 max-w-2xl mx-auto mb-12 leading-relaxed will-change-transform"
           style={{ opacity: 0 }}
         >
-          Somos una fundación socioambiental que trabaja desde la provincia de
-          Corrientes para generar acción climática real, educación ambiental y
-          políticas públicas basadas en evidencia.
+          Somos una fundación socioambiental de Corrientes que trabaja en toda
+          la región del NEA para impulsar acción climática concreta. Promovemos
+          la participación ciudadana, fortalecemos la educación ambiental y
+          fomentamos el desarrollo de políticas públicas responsables, basadas
+          en evidencia científica.
         </p>
 
         <div
@@ -397,7 +399,7 @@ export default function HeroScene() {
             Conocé nuestra misión
           </Link>
           <Link
-            href="/blog"
+            href="/noticias"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-full border-2 border-white/25 text-white hover:bg-white/10 transition-all duration-400 hover:-translate-y-1 backdrop-blur-sm text-base"
           >
             Últimas noticias →

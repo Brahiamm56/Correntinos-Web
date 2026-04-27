@@ -13,57 +13,25 @@ const valores = [
   { icon: "🤲", title: "Comunidad", description: "Creemos en el poder de la acción colectiva y participativa." },
   { icon: "📢", title: "Transparencia", description: "Rendimos cuentas de cada proyecto y cada recurso utilizado." },
   { icon: "🌱", title: "Sustentabilidad", description: "Pensamos a largo plazo en cada decisión que tomamos." },
-  { icon: "💡", title: "Innovación", description: "Buscamos soluciones creativas a los desafíos ambientales." },
+  { icon: "⚖️", title: "Justicia socioambiental", description: "Entendemos que la crisis climática también es social, y promovemos soluciones inclusivas y equitativas." },
 ];
 
-const equipo = [
-  {
-    nombre: "Guido Paparella",
-    rol: "Presidente",
-    bio: "Fundador y líder de la iniciativa. Apasionado por la acción climática y el desarrollo sustentable en la provincia de Corrientes.",
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10" aria-hidden>
-        <circle cx="24" cy="18" r="9" fill="currentColor" opacity="0.9" />
-        <path d="M8 42c0-8.837 7.163-16 16-16s16 7.163 16 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.7" />
-        <path d="M34 10l3 3-3 3" stroke="var(--dorado)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    accent: "var(--verde-hoja)",
-  },
-  {
-    nombre: "Equipo Técnico",
-    rol: "Investigación y Proyectos",
-    bio: "Un grupo multidisciplinario de profesionales comprometidos con la generación de datos y la implementación de proyectos ambientales.",
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10" aria-hidden>
-        <circle cx="16" cy="20" r="7" fill="currentColor" opacity="0.7" />
-        <circle cx="32" cy="20" r="7" fill="currentColor" opacity="0.9" />
-        <path d="M2 40c0-7.18 6.268-13 14-13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
-        <path d="M46 40c0-7.18-6.268-13-14-13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
-        <path d="M16 27c2.4-1.3 5-2 8-2s5.6.7 8 2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.8" />
-      </svg>
-    ),
-    accent: "var(--verde-selva)",
-  },
-  {
-    nombre: "Voluntarios",
-    rol: "Red de Acción",
-    bio: "Más de 30 voluntarios activos que llevan la misión de la fundación a cada rincón de Corrientes.",
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10" aria-hidden>
-        <path d="M24 6C14 6 6 14 6 24s8 18 18 18 18-8 18-18S34 6 24 6z" fill="currentColor" opacity="0.15" />
-        <path d="M24 14v10l6 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8 24h4M36 24h4M24 8v4M24 36v4" stroke="var(--dorado)" strokeWidth="2.5" strokeLinecap="round" />
-      </svg>
-    ),
-    accent: "var(--verde-claro)",
-  },
+const consejo = [
+  { nombre: "Guido Paparella", rol: "Presidente" },
+  { nombre: "Camila Núñez", rol: "Secretaria" },
+  { nombre: "Deborah Iserre", rol: "Tesorera" },
+  { nombre: "Nicolás Duarte", rol: "Fundador" },
 ];
 
 const hitos = [
-  { year: "2024", title: "El inicio", text: "Nace la idea de crear una fundación climática en Corrientes, impulsada por la urgencia de los incendios en los Esteros del Iberá." },
-  { year: "2025", title: "Formalización", text: "Constitución legal de la fundación y lanzamiento de los primeros proyectos de educación ambiental en escuelas rurales." },
-  { year: "2026", title: "Escala", text: "Primer inventario provincial de emisiones GEI y expansión del programa educativo a 12 escuelas, alcanzando 500+ estudiantes." },
+  { year: "2020", title: "El inicio", text: "Un grupo de amigos, preocupados por la crisis climática y la falta de acción en Corrientes, decide organizarse y comenzar a actuar de manera colectiva. Así nace Correntinos Contra el Cambio Climático." },
+  { year: "2020", title: "Red de Emprendedores Sustentables", text: "Uno de los primeros programas de la organización. Surge con el objetivo de acompañar y fortalecer a emprendedores que desarrollan productos con una mirada ambiental, promoviendo el trabajo articulado y la construcción de una economía circular." },
+  { year: "2020", title: "Ordenanza \"Corrientes sin colillas\"", text: "Tras un año de trabajo —desde la redacción del proyecto hasta su impulso en el Concejo Deliberante y en las calles— logramos la aprobación de una ordenanza municipal destinada a reducir el impacto ambiental de las colillas de cigarrillo." },
+  { year: "2022", title: "Cumbre Climática de las Juventudes (LCOY)", text: "Nos propusimos un objetivo ambicioso: organizar uno de los encuentros ambientales juveniles más importantes del país. Reunimos a más de 400 jóvenes de 20 provincias para debatir, intercambiar ideas y construir propuestas frente a la crisis climática." },
+  { year: "2022", title: "Participación internacional", text: "La organización de la LCOY nos abrió las puertas a espacios internacionales clave. Participamos en la RCOY en Costa Rica, la COY en Egipto y el C40 en Buenos Aires, llevando la voz del litoral y visibilizando las problemáticas ambientales que enfrenta nuestra región en el contexto de la crisis climática global." },
+  { year: "2023", title: "Formalización", text: "Consolidamos nuestro crecimiento con la constitución legal de la organización como fundación." },
+  { year: "2025", title: "Educación ambiental", text: "Lanzamos el programa \"Ñangareko Yvy\", a través del cual desarrollamos charlas, talleres y actividades lúdicas, alcanzando a más de 300 jóvenes de 10 escuelas." },
+  { year: "2026", title: "Acción legal ambiental", text: "Dimos un paso clave en la defensa del ambiente al involucrarnos en nuestra primera demanda judicial, en el marco de la causa por desmontes ilegales en el Parque Caraguatá, en Resistencia." },
 ];
 
 export default function QuienesSomosPage() {
@@ -154,27 +122,45 @@ export default function QuienesSomosPage() {
               <h2>Nuestro Equipo</h2>
             </div>
           </AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {equipo.map((miembro, i) => (
-              <AnimatedSection key={miembro.nombre} delay={i * 100}>
-                <div className="text-center flex flex-col items-center">
-                  {/* Illustrated role avatar */}
-                  <div
-                    className="w-24 h-24 rounded-2xl flex items-center justify-center mb-5 shadow-lg"
-                    style={{
-                      background: `linear-gradient(135deg, ${miembro.accent}22, ${miembro.accent}44)`,
-                      border: `2px solid ${miembro.accent}33`,
-                      color: miembro.accent,
-                    }}
-                  >
-                    {miembro.icon}
+
+          {/* Consejo de Administración */}
+          <div className="mb-16">
+            <AnimatedSection>
+              <h3 className="text-xl text-center mb-4">Consejo de Administración</h3>
+              <p className="text-[var(--gris-calido)] text-center max-w-2xl mx-auto mb-8 text-sm">
+                El órgano responsable de la conducción institucional y la toma de decisiones estratégicas de la fundación.
+              </p>
+            </AnimatedSection>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              {consejo.map((miembro, i) => (
+                <AnimatedSection key={miembro.nombre} delay={i * 80}>
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-[var(--verde-profundo)] mb-1">{miembro.nombre}</h4>
+                    <p className="text-sm font-medium text-[var(--dorado)]">{miembro.rol}</p>
                   </div>
-                  <h3 className="text-lg mb-1">{miembro.nombre}</h3>
-                  <p className="text-sm font-semibold text-[var(--dorado)] mb-3">{miembro.rol}</p>
-                  <p className="text-sm text-[var(--gris-calido)] leading-relaxed">{miembro.bio}</p>
-                </div>
-              </AnimatedSection>
-            ))}
+                </AnimatedSection>
+              ))}
+            </div>
+          </div>
+
+          {/* Equipo de Coordinación */}
+          <div className="mb-16">
+            <AnimatedSection delay={200}>
+              <h3 className="text-xl text-center mb-4">Equipo de Coordinación</h3>
+              <p className="text-[var(--gris-calido)] text-center max-w-2xl mx-auto text-sm">
+                Integrado por miembros comprometidos que lideran, organizan y dan seguimiento a los distintos proyectos de la fundación, asegurando su desarrollo e impacto en el territorio.
+              </p>
+            </AnimatedSection>
+          </div>
+
+          {/* Voluntariado */}
+          <div>
+            <AnimatedSection delay={300}>
+              <h3 className="text-xl text-center mb-4">Voluntariado</h3>
+              <p className="text-[var(--gris-calido)] text-center max-w-2xl mx-auto text-sm">
+                Una red de más de 90 voluntarios en toda la región del NEA que, con compromiso y vocación colectiva, aportan su tiempo y energía para construir un futuro más sostenible.
+              </p>
+            </AnimatedSection>
           </div>
         </div>
       </section>
