@@ -46,7 +46,7 @@ export default function NoticiasClient({ noticias, total }: Props) {
   return (
     <div className="min-h-screen bg-[var(--crema)]">
       <section
-        className="relative pt-28 pb-20 overflow-hidden"
+        className="relative pt-28 pb-8 lg:pb-24 overflow-hidden rounded-b-[40px] lg:rounded-b-[80px]"
         style={{
           background:
             "linear-gradient(160deg, #071f17 0%, #0B3D2E 45%, #1A5C3A 100%)",
@@ -62,34 +62,33 @@ export default function NoticiasClient({ noticias, total }: Props) {
         />
         <div className="section-container relative z-10 text-center max-w-2xl mx-auto">
           <AnimatedSection>
-            <span className="section-label justify-center !text-[var(--dorado-suave)]">
+            <span className="section-label justify-center !text-[var(--dorado-suave)] mb-3 lg:mb-4">
               Noticias
             </span>
-            <h1 className="!text-white mb-4">
+            <h1 className="!text-white mb-3 lg:mb-4 text-3xl sm:text-5xl lg:text-6xl">
               Noticias y <span className="text-[var(--dorado)]">Novedades</span>
             </h1>
-            <p className="text-base text-white/65 leading-relaxed mx-auto">
+            <p className="text-sm sm:text-lg text-white/80 leading-relaxed mx-auto max-w-lg mb-2 lg:mb-8">
               Mantenete informado sobre nuestros proyectos, investigaciones y acciones climáticas.
             </p>
           </AnimatedSection>
         </div>
-      </section>
 
-      <section className="relative bg-[var(--crema)]">
-        <div className="section-container !pt-0 !pb-0">
+        {/* CONTENEDOR DEL BUSCADOR DENTRO DEL HEADER */}
+        <div className="section-container relative z-20 !pt-2 lg:!pt-0 !pb-0">
           <AnimatedSection>
-            <div className="relative -mt-10 rounded-[28px] border border-[var(--border)] bg-white/80 px-5 py-5 shadow-[0_28px_90px_rgba(11,61,46,0.08)] backdrop-blur-md sm:px-6 sm:py-6">
+            <div className="mx-auto max-w-7xl rounded-[28px] lg:rounded-3xl border border-white/10 bg-white/95 px-5 py-5 sm:px-8 sm:py-8 shadow-2xl backdrop-blur-xl">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--verde-hoja)]/70 mb-1">
+                  <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.24em] font-semibold text-[var(--verde-hoja)] mb-1.5 lg:mb-2">
                     Archivo vivo
                   </p>
-                  <h2 className="text-xl sm:text-2xl">Todas las noticias publicadas</h2>
-                  <p className="text-sm text-[var(--gris-calido)] mt-1">{resultsLabel}</p>
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl text-[var(--verde-profundo)] mb-1">Todas las noticias</h2>
+                  <p className="text-xs sm:text-sm font-medium text-[var(--gris-calido)]">{resultsLabel}</p>
                 </div>
 
-                <div className="relative w-full lg:max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--gris-calido)]" />
+                <div className="relative w-full lg:max-w-[400px] mt-2 lg:mt-0">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--verde-hoja)]/70 mix-blend-multiply" />
                   <input
                     type="text"
                     placeholder="Buscar noticia por título..."
@@ -98,7 +97,7 @@ export default function NoticiasClient({ noticias, total }: Props) {
                       setSearch(e.target.value);
                       setPage(1);
                     }}
-                    className="w-full rounded-xl border-2 border-[var(--border)] bg-white pl-10 pr-4 py-3 text-sm transition-colors focus:border-[var(--verde-claro)] focus:outline-none"
+                    className="w-full rounded-xl lg:rounded-2xl border-2 border-transparent bg-[var(--crema)] pl-11 pr-4 py-3 lg:py-3.5 text-[14px] lg:text-[15px] font-medium text-[var(--verde-profundo)] placeholder:text-[var(--verde-hoja)]/60 transition-all hover:bg-[#F0EBE0] focus:border-[var(--dorado-suave)] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--dorado)]/10"
                   />
                 </div>
               </div>
@@ -107,8 +106,8 @@ export default function NoticiasClient({ noticias, total }: Props) {
         </div>
       </section>
 
-      <section className="bg-[var(--crema)]">
-        <div className="section-container !pt-8 !pb-20">
+      <section className="bg-[var(--crema)] relative z-10 pt-8 lg:pt-12 -mt-4 lg:-mt-8">
+        <div className="section-container pb-20">
         {filtered.length === 0 ? (
             <AnimatedSection>
               <div className="text-center py-20">

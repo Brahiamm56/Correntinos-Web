@@ -5,6 +5,10 @@ import HeroScene from "@/components/HeroScene";
 import ImpactSection from "@/components/ImpactSection";
 import ParallaxLayer from "@/components/ParallaxLayer";
 import StatsCounter from "@/components/StatsCounter";
+import ProductsCarousel from "@/components/ProductsCarousel";
+import DonationBanner from "@/components/DonationBanner";
+import { createServiceClient } from "@/lib/supabase/server";
+import type { Producto, Categoria } from "@/types/database";
 import { getNoticiaExcerpt, getPublishedNoticias } from "@/lib/noticias";
 
 const stats = [
@@ -17,13 +21,35 @@ const stats = [
 
 const fallbackNewsCovers = ["/hero-bg.png", "/education-bg.png", "/research-bg.png"];
 
+async function getFeaturedProductos() {
+  try {
+    const supabase = await createServiceClient();
+    const { data } = await supabase
+      .from("productos")
+      .select("*, categoria:categorias(id, nombre)")
+      .eq("activo", true)
+      .order("creado_en", { ascending: false })
+      .limit(12);
+    return (data ?? []) as (Producto & { categoria: Categoria | null })[];
+  } catch (error) {
+    console.error("Error cargando productos destacados:", error);
+    return [] as (Producto & { categoria: Categoria | null })[];
+  }
+}
+
 export default async function HomePage() {
-  const latestNoticias = await getPublishedNoticias({ limit: 3 });
+  const [latestNoticias, featuredProductos] = await Promise.all([
+    getPublishedNoticias({ limit: 3 }),
+    getFeaturedProductos(),
+  ]);
 
   return (
     <>
       {/* ─── HERO ─── */}
       <HeroScene />
+
+      {/* ─── PRODUCT CAROUSEL — comprar ni bien entran ─── */}
+      <ProductsCarousel productos={featuredProductos} />
 
       {/* ─── MISSION STATEMENT ─── */}
       <section
@@ -211,6 +237,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ─── DONATION BANNER — alto impacto ─── */}
+      <DonationBanner />
 
       {/* ─── LATEST NEWS ─── */}
       <section

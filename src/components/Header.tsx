@@ -19,6 +19,7 @@ const navLinks = [
 ];
 
 export default function Header() {
+  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -31,6 +32,11 @@ export default function Header() {
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  // Use mounted state to avoid hydration mismatch with portals
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -61,9 +67,36 @@ export default function Header() {
   //   z-9990  → overlay (full-screen cream backdrop)
   //   z-9995  → toggle button (always above the overlay)
   //
-  const portals = typeof document !== "undefined"
+  const portals = mounted && typeof document !== "undefined"
     ? createPortal(
         <>
+          {/* ── Mobile cart pill (visible only when items > 0) ─────── */}
+          {cartCount > 0 && !menuOpen && (
+            <Link
+              href="/tienda/carrito"
+              aria-label={`Ver carrito (${cartCount})`}
+              className="fixed lg:hidden flex items-center gap-1.5 h-10 px-3 rounded-full cart-pop shadow-[0_8px_24px_rgba(11,61,46,0.25)] transition-all duration-300"
+              style={{
+                zIndex: 9994,
+                top: "20px",
+                right: "calc(var(--section-padding-x) + 52px)",
+                background: isTransparent
+                  ? "rgba(255,255,255,0.15)"
+                  : "var(--verde-profundo)",
+                backdropFilter: "blur(10px)",
+                color: isTransparent ? "#fff" : "#fff",
+                border: isTransparent
+                  ? "1px solid rgba(255,255,255,0.25)"
+                  : "1px solid var(--verde-selva)",
+              }}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--dorado)] text-[var(--verde-profundo)] text-[10px] flex items-center justify-center font-bold">
+                {cartCount}
+              </span>
+            </Link>
+          )}
+
           {/* ── Toggle button (hamburger ↔ X) ──────────────────────────
               Fixed to match the header's right padding and vertical centre.
               Top 20px = (header ~80px - button 40px) / 2.              */}
@@ -227,7 +260,7 @@ export default function Header() {
               alt="Logo Fundación Correntinos Contra el Cambio Climático"
               width={48}
               height={48}
-              className="transition-transform duration-500 group-hover:scale-105"
+              className="w-auto h-auto transition-transform duration-500 group-hover:scale-105"
               priority
             />
             <span
@@ -274,19 +307,20 @@ export default function Header() {
 
           {/* CTA Desktop */}
           <div className="hidden lg:flex items-center gap-2">
-            <Link
-              href="/tienda/carrito"
-              className={`relative p-2.5 rounded-full transition-all duration-300 ${
-                isTransparent ? "text-white/80 hover:text-white hover:bg-white/10" : "text-[var(--gris-medio)] hover:text-[var(--verde-profundo)] hover:bg-[var(--verde-palido)]"
-              }`}
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
+            {cartCount > 0 && (
+              <Link
+                href="/tienda/carrito"
+                aria-label={`Ver carrito (${cartCount} ${cartCount === 1 ? "producto" : "productos"})`}
+                className={`relative p-2.5 rounded-full transition-all duration-300 cart-pop ${
+                  isTransparent ? "text-white/80 hover:text-white hover:bg-white/10" : "text-[var(--gris-medio)] hover:text-[var(--verde-profundo)] hover:bg-[var(--verde-palido)]"
+                }`}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 px-1 rounded-full bg-[var(--dorado)] text-[var(--verde-profundo)] text-[10px] flex items-center justify-center font-bold ring-2 ring-white/80">
                   {cartCount}
                 </span>
-              )}
-            </Link>
+              </Link>
+            )}
             {user ? (
               <Link
                 href={profile?.rol === "admin" ? "/admin" : "/perfil"}

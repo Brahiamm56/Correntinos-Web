@@ -59,7 +59,7 @@ export default function Footer() {
                 alt="Logo Fundación Correntinos"
                 width={48}
                 height={48}
-                className="transition-transform duration-500 group-hover:scale-105"
+                className="w-auto h-auto transition-transform duration-500 group-hover:scale-105"
               />
               <span
                 className="text-base font-bold text-white leading-tight"
