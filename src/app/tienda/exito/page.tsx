@@ -25,8 +25,8 @@ function ExitoContent() {
             </div>
           )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/perfil" className="btn-secondary">
-              Ver mis pedidos
+            <Link href="/contacto" className="btn-secondary">
+              Consultar por mi pedido
             </Link>
             <Link href="/tienda" className="btn-primary">
               Seguir comprando

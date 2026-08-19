@@ -50,16 +50,25 @@ function normalizeRequestedProducts(value: unknown) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const quiere_envio = body.quiere_envio === true;
     const cliente_nombre = normalizeTextField(body.cliente_nombre);
     const cliente_email = normalizeTextField(body.cliente_email);
     const cliente_telefono = normalizeTextField(body.cliente_telefono);
-    const cliente_direccion = normalizeTextField(body.cliente_direccion);
-    const cliente_ciudad = normalizeTextField(body.cliente_ciudad);
+    const cliente_direccion = quiere_envio
+      ? normalizeTextField(body.cliente_direccion)
+      : "Sin envío - coordinar retiro";
+    const cliente_ciudad = quiere_envio
+      ? normalizeTextField(body.cliente_ciudad)
+      : "A coordinar";
     const total = Number(body.total);
 
     // Validate required fields
-    if (!cliente_nombre || !cliente_email || !cliente_telefono || !cliente_direccion || !cliente_ciudad) {
-      return NextResponse.json({ error: "Todos los campos son obligatorios" }, { status: 400 });
+    if (!cliente_nombre || !cliente_email || !cliente_telefono) {
+      return NextResponse.json({ error: "Completá nombre, email y teléfono" }, { status: 400 });
+    }
+
+    if (quiere_envio && (!cliente_direccion || !cliente_ciudad)) {
+      return NextResponse.json({ error: "Completá la dirección de envío" }, { status: 400 });
     }
 
     const requestedProducts = normalizeRequestedProducts(body.productos);
@@ -71,8 +80,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Total inválido" }, { status: 400 });
     }
 
-    // Authenticate user via Better Auth
-    const session = await auth.api.getSession({ headers: request.headers });
+    // Associate the order only when there is an active session. Guest checkout remains valid.
+    const session = await auth.api.getSession({ headers: request.headers }).catch(() => null);
     const userId = session?.user?.id ?? null;
 
     // Validate stock and price with Neon DB

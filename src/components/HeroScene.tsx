@@ -70,6 +70,9 @@ export default function HeroScene({ intro }: { intro?: string }) {
             <Link href="#areas-de-impacto" className="group inline-flex w-fit items-center gap-3 border-b-2 border-[var(--dorado)] pb-2 text-sm font-bold text-[var(--dorado-suave)] transition-colors hover:border-white hover:text-white">
               Conocé nuestro trabajo <ArrowDown size={19} className="transition-transform duration-300 group-hover:translate-y-1" />
             </Link>
+            <Link href="#ultimas-noticias" className="group inline-flex w-fit items-center gap-3 border-b-2 border-white/35 pb-2 text-sm font-bold text-white transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado-suave)]">
+              Ver últimas noticias <ArrowDown size={19} className="transition-transform duration-300 group-hover:translate-y-1" />
+            </Link>
             <Link href="/trabaja-con-nosotros" className="group inline-flex w-fit items-center gap-3 border-b-2 border-white/35 pb-2 text-sm font-bold text-white transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado-suave)]">
               Sumate a la comunidad <ArrowRight size={19} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>

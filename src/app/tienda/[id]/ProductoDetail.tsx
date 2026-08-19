@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { useAuthStore } from "@/store/auth";
-import { Add, ArrowLeft, CheckCircle, Lock, Minus, Package, ShoppingCart } from "reicon-react";
+import { Add, ArrowLeft, CheckCircle, Minus, Package, ShoppingCart, Truck } from "reicon-react";
 import type { Producto, Categoria } from "@/types/database";
 
 interface Props {
@@ -21,9 +21,10 @@ export default function ProductoDetail({ producto }: Props) {
   const buyNowFromQuery = searchParams.get("buyNow") === "1";
   const [cantidad, setCantidad] = useState(1);
   const { addItem } = useCartStore();
-  const { user, profile, loading: authLoading } = useAuthStore();
+  const { profile } = useAuthStore();
   const [added, setAdded] = useState(false);
   const [buyNowOpen, setBuyNowOpen] = useState(false);
+  const [wantsShipping, setWantsShipping] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderError, setOrderError] = useState("");
   const [formData, setFormData] = useState({
@@ -56,11 +57,11 @@ export default function ProductoDetail({ producto }: Props) {
   }, [profile]);
 
   useEffect(() => {
-    if (!authLoading && user && buyNowFromQuery) {
+    if (buyNowFromQuery) {
       const frame = window.requestAnimationFrame(() => setBuyNowOpen(true));
       return () => window.cancelAnimationFrame(frame);
     }
-  }, [authLoading, buyNowFromQuery, user]);
+  }, [buyNowFromQuery]);
 
   useEffect(() => {
     if (buyNowOpen) {
@@ -88,16 +89,6 @@ export default function ProductoDetail({ producto }: Props) {
 
   function handleBuyNow() {
     const redirect = `/tienda/${producto.id}?buyNow=1&qty=${cantidad}`;
-
-    if (authLoading) {
-      return;
-    }
-
-    if (!user) {
-      router.push(`/auth/login?redirect=${encodeURIComponent(redirect)}`);
-      return;
-    }
-
     setBuyNowOpen(true);
     router.replace(redirect, { scroll: false });
   }
@@ -113,6 +104,9 @@ export default function ProductoDetail({ producto }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          quiere_envio: wantsShipping,
+          cliente_direccion: wantsShipping ? formData.cliente_direccion : "Sin envío - coordinar retiro",
+          cliente_ciudad: wantsShipping ? formData.cliente_ciudad : "A coordinar",
           productos: [
             {
               id: producto.id,
@@ -228,29 +222,17 @@ export default function ProductoDetail({ producto }: Props) {
 
                   <button
                     onClick={handleBuyNow}
-                    disabled={authLoading}
-                    className="action-link justify-center disabled:cursor-not-allowed disabled:opacity-50"
+                    className="action-link justify-center"
                   >
-                    {!user && <Lock className="w-4 h-4" />}
-                    {authLoading
-                      ? "Verificando..."
-                      : user
-                      ? "Hacer el pedido"
-                      : "Iniciar sesión para pedir"}
+                    Hacer el pedido
                   </button>
                 </div>
-
-                {!user && !authLoading && (
-                  <p className="text-sm text-[var(--gris-calido)] mt-3 max-w-md">
-                    Si elegís comprar ahora, primero te pediremos iniciar sesión y después volverás a este producto para completar el envío.
-                  </p>
-                )}
               </>
             )}
           </div>
         </div>
 
-        {producto.stock > 0 && buyNowOpen && user && (
+        {producto.stock > 0 && buyNowOpen && (
           <div
             ref={checkoutRef}
             className="mt-14 grid lg:grid-cols-[1.3fr_0.7fr] gap-6 scroll-mt-32"
@@ -262,7 +244,7 @@ export default function ProductoDetail({ producto }: Props) {
                 </p>
                 <h2 className="text-2xl mb-2">Finalizá tu pedido desde este producto</h2>
                 <p className="text-sm text-[var(--gris-calido)] max-w-2xl">
-                  Completá tus datos de envío para registrar el pedido sin pasar por el carrito. El envío se coordina por separado.
+                  No necesitás iniciar sesión. Completá tus datos para registrar el pedido sin pasar por el carrito.
                 </p>
               </div>
 
@@ -313,38 +295,67 @@ export default function ProductoDetail({ producto }: Props) {
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="cliente_ciudad" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
-                    Ciudad *
-                  </label>
-                  <input
-                    id="cliente_ciudad"
-                    name="cliente_ciudad"
-                    type="text"
-                    required
-                    value={formData.cliente_ciudad}
-                    onChange={handleFieldChange}
-                    className="field"
-                    placeholder="Corrientes"
-                  />
-                </div>
               </div>
 
-              <div>
-                <label htmlFor="cliente_direccion" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
-                  Dirección *
+              <div className="border-t border-[var(--border)] pt-5">
+                <label className="flex items-start gap-3 text-sm font-semibold text-[var(--verde-profundo)]">
+                  <input
+                    type="checkbox"
+                    checked={wantsShipping}
+                    onChange={(event) => setWantsShipping(event.target.checked)}
+                    className="mt-1 h-4 w-4 accent-[var(--verde-hoja)]"
+                  />
+                  <span>
+                    Quiero coordinar envío
+                    <span className="mt-1 block font-normal leading-relaxed text-[var(--gris-calido)]">
+                      Si no lo marcás, el equipo coordina retiro o entrega por mensaje.
+                    </span>
+                  </span>
                 </label>
-                <input
-                  id="cliente_direccion"
-                  name="cliente_direccion"
-                  type="text"
-                  required
-                  value={formData.cliente_direccion}
-                  onChange={handleFieldChange}
-                  className="field"
-                  placeholder="Calle, número, piso/depto"
-                />
               </div>
+
+              {wantsShipping && (
+                <div className="grid gap-4 border-t border-[var(--border)] pt-5">
+                  <div>
+                    <label htmlFor="cliente_ciudad" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
+                      Ciudad *
+                    </label>
+                    <input
+                      id="cliente_ciudad"
+                      name="cliente_ciudad"
+                      type="text"
+                      required={wantsShipping}
+                      value={formData.cliente_ciudad}
+                      onChange={handleFieldChange}
+                      className="field"
+                      placeholder="Corrientes"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="cliente_direccion" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
+                      Dirección de envío *
+                    </label>
+                    <input
+                      id="cliente_direccion"
+                      name="cliente_direccion"
+                      type="text"
+                      required={wantsShipping}
+                      value={formData.cliente_direccion}
+                      onChange={handleFieldChange}
+                      className="field"
+                      placeholder="Calle, número, piso/depto"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {!wantsShipping && (
+                <p className="flex items-start gap-2 border-l-2 border-[var(--dorado)] bg-white px-4 py-3 text-sm leading-relaxed text-[var(--gris-calido)]">
+                  <Truck size={18} className="mt-0.5 shrink-0 text-[var(--verde-hoja)]" />
+                  El envío o retiro se coordina después de registrar el pedido.
+                </p>
+              )}
 
               {orderError && (
                 <p role="alert" className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{orderError}</p>

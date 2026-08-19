@@ -32,24 +32,23 @@ export default function DonacionesClient({ email, phone }: { email: string; phon
 
   return (
     <div className="min-h-screen bg-[var(--papel)] pt-[4.75rem]">
-      <section className="section-container !pb-16 !pt-12 sm:!pb-20 sm:!pt-16">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:items-end">
+      <section className="section-container !pb-14 !pt-9 sm:!pb-20 sm:!pt-16">
+        <div className="grid gap-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:items-end">
           <div className="max-w-3xl">
-            <p className="section-label">Aportes individuales</p>
-            <h1>Sostener la acción climática también es participar.</h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--gris-calido)]">
-              Elegí una referencia o escribí el monto que quieras aportar. Al continuar, abrís una
-              conversación con el equipo para conocer los medios disponibles y coordinar la contribución.
+            <p className="section-label">Donaciones</p>
+            <h1>Doná para sostener la acción climática.</h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--gris-calido)] sm:text-lg">
+              Elegí un monto y coordiná tu aporte con el equipo.
             </p>
           </div>
-          <p className="border-t border-[var(--border-strong)] pt-5 text-sm leading-relaxed text-[var(--gris-calido)]">
-            Este sitio todavía no procesa pagos en línea. Ningún monto se debita desde esta pantalla.
+          <p className="hidden border-t border-[var(--border-strong)] pt-5 text-sm leading-relaxed text-[var(--gris-calido)] lg:block">
+            Abajo te contamos qué sostiene cada donación y cómo se acompaña el trabajo en territorio.
           </p>
         </div>
 
-        <fieldset className="mt-12 border-y border-[var(--border-strong)] py-2">
+        <fieldset className="mt-7 border-y border-[var(--border-strong)] py-2 sm:mt-12">
           <legend className="sr-only">Elegí un monto de referencia</legend>
-          <div role="radiogroup" aria-label="Monto de referencia" className="grid sm:grid-cols-4">
+          <div role="radiogroup" aria-label="Monto de referencia" className="grid grid-cols-2 sm:grid-cols-4">
             {amounts.map((amount, index) => {
               const active = selected === amount;
               return (
@@ -62,7 +61,9 @@ export default function DonacionesClient({ email, phone }: { email: string; phon
                     setSelected(amount);
                     setCustom("");
                   }}
-                  className={`min-h-20 border-b px-4 py-5 text-left transition-colors sm:border-b-0 sm:text-center ${
+                  className={`min-h-16 border-b px-4 py-4 text-left transition-colors sm:min-h-20 sm:border-b-0 sm:py-5 sm:text-center ${
+                    index % 2 === 1 ? "border-l border-[var(--border)]" : ""
+                  } ${
                     index > 0 ? "sm:border-l sm:border-[var(--border)]" : ""
                   } ${active ? "text-[var(--verde-profundo)]" : "text-[var(--gris-calido)] hover:text-[var(--verde-profundo)]"}`}
                 >
@@ -94,7 +95,8 @@ export default function DonacionesClient({ email, phone }: { email: string; phon
                   setCustom(event.target.value.replace(/[^0-9.]/g, ""));
                   setSelected("Otro");
                 }}
-                className="field pl-8"
+                className="field"
+                style={{ paddingLeft: "2.5rem" }}
               />
             </span>
           </label>
@@ -102,11 +104,15 @@ export default function DonacionesClient({ email, phone }: { email: string; phon
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="action-primary"
+            className="action-primary w-full sm:w-fit"
           >
-            Coordinar mi aporte <ArrowRight size={18} />
+            Donar ahora <ArrowRight size={18} />
           </a>
         </div>
+
+        <p className="mt-5 text-sm leading-relaxed text-[var(--gris-calido)]">
+          Este sitio todavía no procesa pagos en línea. Ningún monto se debita desde esta pantalla.
+        </p>
       </section>
 
       <section className="dark-section">

@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart";
 import { useAuthStore } from "@/store/auth";
-import { ArrowLeft, ShoppingBag } from "reicon-react";
+import { ArrowLeft, ShoppingBag, Truck } from "reicon-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotal, toOrderProducts, clearCart } = useCartStore();
-  const { user, profile, loading: authLoading } = useAuthStore();
+  const { profile } = useAuthStore();
 
   const [formData, setFormData] = useState({
     cliente_nombre: "",
@@ -19,6 +19,7 @@ export default function CheckoutPage() {
     cliente_direccion: "",
     cliente_ciudad: "",
   });
+  const [wantsShipping, setWantsShipping] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,12 +34,6 @@ export default function CheckoutPage() {
     });
     return () => window.cancelAnimationFrame(frame);
   }, [profile]);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/auth/login?redirect=/tienda/checkout");
-    }
-  }, [user, authLoading, router]);
 
   if (items.length === 0) {
     return (
@@ -55,14 +50,6 @@ export default function CheckoutPage() {
     );
   }
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center pt-24">
-        <div className="animate-pulse text-[var(--gris-calido)]">Cargando...</div>
-      </div>
-    );
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -74,6 +61,9 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          quiere_envio: wantsShipping,
+          cliente_direccion: wantsShipping ? formData.cliente_direccion : "Sin envío - coordinar retiro",
+          cliente_ciudad: wantsShipping ? formData.cliente_ciudad : "A coordinar",
           productos: toOrderProducts(),
           total: getTotal(),
         }),
@@ -105,12 +95,18 @@ export default function CheckoutPage() {
           Volver al carrito
         </Link>
 
-        <h1 className="text-3xl mb-8">Checkout</h1>
+        <div className="mb-8">
+          <p className="section-label">Pedido invitado</p>
+          <h1 className="text-3xl">Finalizá tu pedido</h1>
+          <p className="mt-3 max-w-2xl text-[var(--gris-calido)]">
+            No necesitás iniciar sesión. Dejanos tus datos para coordinar el pago y la entrega.
+          </p>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
             <div className="border-y border-[var(--border-strong)] py-6">
-              <h2 className="!text-lg font-bold mb-4">Datos de envío</h2>
+              <h2 className="!text-lg font-bold mb-4">Datos del cliente</h2>
               <div className="space-y-4">
                 <div>
                   <label htmlFor="cliente_nombre" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
@@ -157,36 +153,64 @@ export default function CheckoutPage() {
                     />
                   </div>
                 </div>
-                <div>
-                  <label htmlFor="cliente_direccion" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
-                    Dirección *
+                <div className="border-t border-[var(--border)] pt-5">
+                  <label className="flex items-start gap-3 text-sm font-semibold text-[var(--verde-profundo)]">
+                    <input
+                      type="checkbox"
+                      checked={wantsShipping}
+                      onChange={(event) => setWantsShipping(event.target.checked)}
+                      className="mt-1 h-4 w-4 accent-[var(--verde-hoja)]"
+                    />
+                    <span>
+                      Quiero coordinar envío
+                      <span className="mt-1 block font-normal leading-relaxed text-[var(--gris-calido)]">
+                        Si no lo marcás, el equipo coordina retiro o entrega por mensaje.
+                      </span>
+                    </span>
                   </label>
-                  <input
-                    id="cliente_direccion"
-                    name="cliente_direccion"
-                    type="text"
-                    required
-                    value={formData.cliente_direccion}
-                    onChange={handleChange}
-                    className="field"
-                    placeholder="Calle, número, piso/depto"
-                  />
                 </div>
-                <div>
-                  <label htmlFor="cliente_ciudad" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
-                    Ciudad *
-                  </label>
-                  <input
-                    id="cliente_ciudad"
-                    name="cliente_ciudad"
-                    type="text"
-                    required
-                    value={formData.cliente_ciudad}
-                    onChange={handleChange}
-                    className="field"
-                    placeholder="Corrientes"
-                  />
-                </div>
+
+                {wantsShipping && (
+                  <div className="grid gap-4 border-t border-[var(--border)] pt-5">
+                    <div>
+                      <label htmlFor="cliente_direccion" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
+                        Dirección de envío *
+                      </label>
+                      <input
+                        id="cliente_direccion"
+                        name="cliente_direccion"
+                        type="text"
+                        required={wantsShipping}
+                        value={formData.cliente_direccion}
+                        onChange={handleChange}
+                        className="field"
+                        placeholder="Calle, número, piso/depto"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cliente_ciudad" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
+                        Ciudad *
+                      </label>
+                      <input
+                        id="cliente_ciudad"
+                        name="cliente_ciudad"
+                        type="text"
+                        required={wantsShipping}
+                        value={formData.cliente_ciudad}
+                        onChange={handleChange}
+                        className="field"
+                        placeholder="Corrientes"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {!wantsShipping && (
+                  <p className="flex items-start gap-2 border-l-2 border-[var(--dorado)] bg-white px-4 py-3 text-sm leading-relaxed text-[var(--gris-calido)]">
+                    <Truck size={18} className="mt-0.5 shrink-0 text-[var(--verde-hoja)]" />
+                    El envío o retiro se coordina después de registrar el pedido.
+                  </p>
+                )}
               </div>
             </div>
 
