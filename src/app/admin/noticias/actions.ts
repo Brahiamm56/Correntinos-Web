@@ -1,11 +1,12 @@
 "use server";
 
-import {
-  AuthorizationError,
-  createServiceClient,
-  requireAdminUser,
-} from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { db } from "@/db";
+import { noticias } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import type { Noticia } from "@/types/database";
 
 interface NoticiaPayload {
   titulo: string;
@@ -15,160 +16,141 @@ interface NoticiaPayload {
   fecha_publicacion: string | null;
 }
 
-function getStoragePathFromPublicUrl(url: string | null, bucket = "media") {
-  if (!url) return null;
-
-  const marker = `/storage/v1/object/public/${bucket}/`;
-  const path = url.split(marker)[1];
-  return path || null;
-}
-
-async function removeStoredImage(
-  supabase: Awaited<ReturnType<typeof createServiceClient>>,
-  imageUrl: string | null
-) {
-  const path = getStoragePathFromPublicUrl(imageUrl);
-  if (!path) return;
-
-  const { error } = await supabase.storage.from("media").remove([path]);
-  if (error) {
-    console.error("No se pudo eliminar la imagen de Storage:", error.message);
-  }
-}
-
 async function getAdminContext() {
-  const user = await requireAdminUser();
-  const supabase = await createServiceClient();
-  return { supabase, user };
-}
-
-function getAuthorizationErrorMessage(error: unknown) {
-  return error instanceof AuthorizationError
-    ? error.message
-    : "No se pudo validar la sesión";
+  const reqHeaders = await headers();
+  const session = await auth.api.getSession({ headers: reqHeaders });
+  if (!session?.user) {
+    throw new Error("Necesitás iniciar sesión");
+  }
+  const user = session.user as typeof session.user & { role?: string };
+  if (user.role !== "admin") {
+    throw new Error("Necesitás permisos de administrador");
+  }
+  return { user };
 }
 
 export async function createNoticia(payload: NoticiaPayload) {
   try {
-    const { supabase, user } = await getAdminContext();
-    const { error } = await supabase.from("noticias").insert({
-      ...payload,
+    const { user } = await getAdminContext();
+    await db.insert(noticias).values({
+      titulo: payload.titulo,
+      contenido: payload.contenido,
+      imagen_url: payload.imagen_url,
+      publicada: payload.publicada,
+      fecha_publicacion: payload.fecha_publicacion ? new Date(payload.fecha_publicacion) : null,
       autor_id: user.id,
     });
 
-    if (error) return { error: error.message };
+    revalidatePath("/");
+    revalidatePath("/noticias");
+    return { error: null };
   } catch (error) {
-    return { error: getAuthorizationErrorMessage(error) };
+    return { error: error instanceof Error ? error.message : "Error inesperado" };
   }
-
-  revalidatePath("/");
-  revalidatePath("/noticias");
-  return { error: null };
 }
 
 export async function updateNoticia(id: string, payload: NoticiaPayload) {
   try {
-    const { supabase } = await getAdminContext();
-    const { data: currentNoticia, error: currentNoticiaError } = await supabase
-      .from("noticias")
-      .select("imagen_url")
-      .eq("id", id)
-      .single();
+    await getAdminContext();
+    await db
+      .update(noticias)
+      .set({
+        titulo: payload.titulo,
+        contenido: payload.contenido,
+        imagen_url: payload.imagen_url,
+        publicada: payload.publicada,
+        fecha_publicacion: payload.fecha_publicacion ? new Date(payload.fecha_publicacion) : null,
+        actualizado_en: new Date(),
+      })
+      .where(eq(noticias.id, id));
 
-    if (currentNoticiaError) return { error: currentNoticiaError.message };
-
-    const { error } = await supabase.from("noticias").update(payload).eq("id", id);
-
-    if (error) return { error: error.message };
-
-    if (currentNoticia?.imagen_url !== payload.imagen_url) {
-      await removeStoredImage(supabase, currentNoticia?.imagen_url ?? null);
-    }
+    revalidatePath("/");
+    revalidatePath("/noticias");
+    revalidatePath(`/noticias/${id}`);
+    return { error: null };
   } catch (error) {
-    return { error: getAuthorizationErrorMessage(error) };
+    return { error: error instanceof Error ? error.message : "Error inesperado" };
   }
-
-  revalidatePath("/");
-  revalidatePath("/noticias");
-  revalidatePath(`/noticias/${id}`);
-  return { error: null };
 }
 
 export async function deleteNoticia(id: string) {
   try {
-    const { supabase } = await getAdminContext();
-    const { data: currentNoticia, error: currentNoticiaError } = await supabase
-      .from("noticias")
-      .select("imagen_url")
-      .eq("id", id)
-      .single();
+    await getAdminContext();
+    await db.delete(noticias).where(eq(noticias.id, id));
 
-    if (currentNoticiaError) return { error: currentNoticiaError.message };
-
-    const { error } = await supabase.from("noticias").delete().eq("id", id);
-
-    if (error) return { error: error.message };
-
-    await removeStoredImage(supabase, currentNoticia?.imagen_url ?? null);
+    revalidatePath("/");
+    revalidatePath("/noticias");
+    revalidatePath(`/noticias/${id}`);
+    return { error: null };
   } catch (error) {
-    return { error: getAuthorizationErrorMessage(error) };
+    return { error: error instanceof Error ? error.message : "Error inesperado" };
   }
-
-  revalidatePath("/");
-  revalidatePath("/noticias");
-  revalidatePath(`/noticias/${id}`);
-  return { error: null };
 }
 
 export async function toggleNoticiaPublicada(id: string, publicada: boolean) {
   try {
-    const { supabase } = await getAdminContext();
-    const { error } = await supabase
-      .from("noticias")
-      .update({
-        publicada: !publicada,
-        fecha_publicacion: !publicada ? new Date().toISOString() : null,
+    await getAdminContext();
+    const newPublicada = !publicada;
+    await db
+      .update(noticias)
+      .set({
+        publicada: newPublicada,
+        fecha_publicacion: newPublicada ? new Date() : null,
+        actualizado_en: new Date(),
       })
-      .eq("id", id);
+      .where(eq(noticias.id, id));
 
-    if (error) return { error: error.message };
+    revalidatePath("/");
+    revalidatePath("/noticias");
+    revalidatePath(`/noticias/${id}`);
+    return { error: null };
   } catch (error) {
-    return { error: getAuthorizationErrorMessage(error) };
+    return { error: error instanceof Error ? error.message : "Error inesperado" };
   }
-
-  revalidatePath("/");
-  revalidatePath("/noticias");
-  revalidatePath(`/noticias/${id}`);
-  return { error: null };
 }
 
 export async function getNoticia(id: string) {
   try {
-    const { supabase } = await getAdminContext();
-    const { data, error } = await supabase
-      .from("noticias")
-      .select("*")
-      .eq("id", id)
-      .single();
+    await getAdminContext();
+    const rows = await db.select().from(noticias).where(eq(noticias.id, id)).limit(1);
+    const n = rows[0];
+    if (!n) return { data: null, error: "Noticia no encontrada" };
 
-    if (error) return { data: null, error: error.message };
-    return { data, error: null };
+    const formatted: Noticia = {
+      id: n.id,
+      titulo: n.titulo,
+      contenido: n.contenido,
+      imagen_url: n.imagen_url,
+      publicada: n.publicada ?? false,
+      autor_id: n.autor_id,
+      fecha_creacion: n.fecha_creacion ? n.fecha_creacion.toISOString() : new Date().toISOString(),
+      fecha_publicacion: n.fecha_publicacion ? n.fecha_publicacion.toISOString() : null,
+      actualizado_en: n.actualizado_en ? n.actualizado_en.toISOString() : new Date().toISOString(),
+    };
+
+    return { data: formatted, error: null };
   } catch (error) {
-    return { data: null, error: getAuthorizationErrorMessage(error) };
+    return { data: null, error: error instanceof Error ? error.message : "Error inesperado" };
   }
 }
 
 export async function getNoticias() {
   try {
-    const { supabase } = await getAdminContext();
-    const { data, error } = await supabase
-      .from("noticias")
-      .select("*")
-      .order("fecha_creacion", { ascending: false });
-
-    if (error) return { data: [], error: error.message };
-    return { data: data ?? [], error: null };
+    await getAdminContext();
+    const data = await db.select().from(noticias).orderBy(desc(noticias.fecha_creacion));
+    const formatted: Noticia[] = data.map((n) => ({
+      id: n.id,
+      titulo: n.titulo,
+      contenido: n.contenido,
+      imagen_url: n.imagen_url,
+      publicada: n.publicada ?? false,
+      autor_id: n.autor_id,
+      fecha_creacion: n.fecha_creacion ? n.fecha_creacion.toISOString() : new Date().toISOString(),
+      fecha_publicacion: n.fecha_publicacion ? n.fecha_publicacion.toISOString() : null,
+      actualizado_en: n.actualizado_en ? n.actualizado_en.toISOString() : new Date().toISOString(),
+    }));
+    return { data: formatted, error: null };
   } catch (error) {
-    return { data: [], error: getAuthorizationErrorMessage(error) };
+    return { data: [], error: error instanceof Error ? error.message : "Error inesperado" };
   }
 }

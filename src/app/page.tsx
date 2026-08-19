@@ -1,423 +1,269 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Calendar,
+  Compass,
+  Globe,
+  Leaf,
+  Tree,
+  Users,
+} from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
+import DonationBanner from "@/components/DonationBanner";
 import HeroScene from "@/components/HeroScene";
 import ImpactSection from "@/components/ImpactSection";
-import ParallaxLayer from "@/components/ParallaxLayer";
-import StatsCounter from "@/components/StatsCounter";
 import ProductsCarousel from "@/components/ProductsCarousel";
-import DonationBanner from "@/components/DonationBanner";
-import { createServiceClient } from "@/lib/supabase/server";
-import type { Producto, Categoria } from "@/types/database";
+import StatsCounter from "@/components/StatsCounter";
+import { db } from "@/db";
+import { categorias, productos } from "@/db/schema";
 import { getNoticiaExcerpt, getPublishedNoticias } from "@/lib/noticias";
+import { getPublicConfiguration } from "@/lib/configuracion";
+import type { Categoria, Producto } from "@/types/database";
+import { desc, eq } from "drizzle-orm";
 
 const stats = [
-  { value: 90, suffix: "+", label: "Voluntarios", icon: "🙋" },
-  { value: 1000, suffix: "+", label: "Estudiantes alcanzados", icon: "🌱" },
-  { value: 15, suffix: "+", label: "Programas impulsados", icon: "🚀" },
-  { value: 100, suffix: "+", label: "Emprendedores Sustentables", icon: "�" },
-  { value: 0, suffix: "", label: "Organizadores de la Cumbre Climática de las Juventudes 2022", icon: "🏆", isText: true },
+  { value: 90, suffix: "+", label: "Voluntarios", Icon: Users },
+  { value: 1000, suffix: "+", label: "Estudiantes alcanzados", Icon: Leaf },
+  { value: 15, suffix: "+", label: "Programas impulsados", Icon: Compass },
+  { value: 100, suffix: "+", label: "Emprendedores sustentables", Icon: Tree },
 ];
 
-const fallbackNewsCovers = ["/hero-bg.png", "/education-bg.png", "/research-bg.png"];
+const trustSignals = [
+  { value: "Corrientes", label: "Nuestro punto de partida" },
+  { value: "90+", label: "Personas voluntarias" },
+  { value: "NEA", label: "Una agenda regional" },
+];
+
+const fallbackNewsCovers = ["/research-bg.png", "/education-bg.png", "/community-bg.png"];
 
 async function getFeaturedProductos() {
   try {
-    const supabase = await createServiceClient();
-    const { data } = await supabase
-      .from("productos")
-      .select("*, categoria:categorias(id, nombre)")
-      .eq("activo", true)
-      .order("creado_en", { ascending: false })
+    const rows = await db
+      .select({
+        id: productos.id,
+        nombre: productos.nombre,
+        descripcion: productos.descripcion,
+        precio: productos.precio,
+        stock: productos.stock,
+        imagen_url: productos.imagen_url,
+        categoria_id: productos.categoria_id,
+        activo: productos.activo,
+        creado_en: productos.creado_en,
+        actualizado_en: productos.actualizado_en,
+        categoria_nombre: categorias.nombre,
+        categoria_descripcion: categorias.descripcion,
+      })
+      .from(productos)
+      .leftJoin(categorias, eq(productos.categoria_id, categorias.id))
+      .where(eq(productos.activo, true))
+      .orderBy(desc(productos.creado_en))
       .limit(12);
-    return (data ?? []) as (Producto & { categoria: Categoria | null })[];
+
+    return rows.map((row) => ({
+      ...row,
+      precio: Number(row.precio),
+      stock: row.stock ?? 0,
+      activo: row.activo ?? true,
+      creado_en: row.creado_en?.toISOString() ?? new Date().toISOString(),
+      actualizado_en: row.actualizado_en?.toISOString() ?? new Date().toISOString(),
+      categoria: row.categoria_id
+        ? {
+            id: row.categoria_id,
+            nombre: row.categoria_nombre ?? "",
+            descripcion: row.categoria_descripcion ?? null,
+          }
+        : null,
+    })) as (Omit<Producto, "categoria"> & { categoria: Categoria | null })[];
   } catch (error) {
     console.error("Error cargando productos destacados:", error);
-    return [] as (Producto & { categoria: Categoria | null })[];
+    return [] as (Omit<Producto, "categoria"> & { categoria: Categoria | null })[];
   }
 }
 
+const formatDate = (date: Date | string | null) =>
+  date
+    ? new Date(date).toLocaleDateString("es-AR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "Sin fecha";
+
 export default async function HomePage() {
-  const [latestNoticias, featuredProductos] = await Promise.all([
+  const [latestNoticias, featuredProductos, configuration] = await Promise.all([
     getPublishedNoticias({ limit: 3 }),
     getFeaturedProductos(),
+    getPublicConfiguration(),
   ]);
+  const featuredNews = latestNoticias[0];
 
   return (
     <>
-      {/* ─── HERO ─── */}
-      <HeroScene />
+      <HeroScene intro={configuration.homeIntro} />
 
-      {/* ─── PRODUCT CAROUSEL — comprar ni bien entran ─── */}
-      <ProductsCarousel productos={featuredProductos} />
-
-      {/* ─── MISSION STATEMENT ─── */}
-      <section
-        id="mision"
-        className="relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(180deg, #0B3D2E 0%, #1A5C3A 8%, #2D7A4F 18%, var(--verde-palido) 48%, var(--crema) 100%)",
-        }}
-      >
-        {/* Forest silhouette bridging the hero — parallaxes down */}
-        <ParallaxLayer
-          speed={0.25}
-          aria-hidden
-          className="absolute -top-10 left-0 right-0 h-72 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 120% 80% at 50% 0%, rgba(11,61,46,0.55) 0%, transparent 70%)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-
-        {/* Soft grid texture (matches hero) to extend the mood */}
-        <div
-          aria-hidden
-          className="absolute top-0 left-0 right-0 h-80 opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px)
-            `,
-            backgroundSize: "80px 80px",
-            maskImage:
-              "linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%)",
-            WebkitMaskImage:
-              "linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%)",
-          }}
-        />
-
-        {/* Decorative parallax blobs */}
-        <ParallaxLayer
-          speed={0.4}
-          aria-hidden
-          className="absolute top-[30%] -left-24 w-[520px] h-[520px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, var(--verde-menta) 0%, transparent 65%)",
-            opacity: 0.45,
-            filter: "blur(60px)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-        <ParallaxLayer
-          speed={-0.3}
-          aria-hidden
-          className="absolute -bottom-32 -right-20 w-[420px] h-[420px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, var(--dorado-claro) 0%, transparent 65%)",
-            opacity: 0.5,
-            filter: "blur(70px)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-
-        {/* Ambient floating leaves, gently parallaxing */}
-        <ParallaxLayer
-          speed={-0.5}
-          rotate={8}
-          aria-hidden
-          className="absolute top-[18%] right-[10%] text-5xl pointer-events-none select-none"
-          style={{ opacity: 0.12 }}
-        >
-          🍃
-        </ParallaxLayer>
-        <ParallaxLayer
-          speed={0.6}
-          rotate={-6}
-          aria-hidden
-          className="absolute bottom-[12%] left-[12%] text-4xl pointer-events-none select-none"
-          style={{ opacity: 0.14 }}
-        >
-          🌿
-        </ParallaxLayer>
-
-        <div className="section-container relative z-10 pt-40 sm:pt-48">
-          <AnimatedSection>
-            <div className="max-w-3xl mx-auto text-center">
-              <span className="section-label justify-center">
-                Nuestra Razón de Ser
-              </span>
-              <h2 className="mb-6">
-                Acción climática local para un impacto global
-              </h2>
-              <p className="text-lg text-[var(--gris-calido)] leading-relaxed mx-auto">
-                Corrientes es una de las provincias más vulnerables al cambio
-                climático en Argentina. Sus humedales, su biodiversidad y sus
-                comunidades rurales están en la primera línea del impacto. Desde
-                la fundación, creemos que la solución empieza aquí, con nosotros,
-                con vos.
-              </p>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* ─── IMPACT AREAS (parallax alternating layout) ─── */}
-      <ImpactSection />
-
-      {/* ─── STATS ─── */}
-      <section
-        id="impacto-numeros"
-        className="relative bg-white overflow-hidden"
-      >
-        <ParallaxLayer
-          speed={0.5}
-          aria-hidden
-          className="absolute -top-20 right-[8%] w-[360px] h-[360px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, var(--verde-palido) 0%, transparent 70%)",
-            opacity: 0.7,
-            filter: "blur(40px)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-        <ParallaxLayer
-          speed={-0.3}
-          aria-hidden
-          className="absolute bottom-10 left-[6%] w-[280px] h-[280px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, var(--dorado-claro) 0%, transparent 70%)",
-            opacity: 0.5,
-            filter: "blur(50px)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-
-        <div className="section-container relative z-10">
-          <AnimatedSection>
-            <div className="text-center mb-12">
-              <span className="section-label justify-center">
-                Nuestro Impacto
-              </span>
-              <h2>Números que hablan</h2>
-            </div>
-          </AnimatedSection>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {stats.map((stat, i) => (
-              <AnimatedSection key={stat.label} delay={i * 120}>
-                <div className="glass-card p-8 text-center flex flex-col items-center gap-4">
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
-                    style={{
-                      background: "linear-gradient(135deg, var(--verde-palido), var(--dorado-claro))",
-                      border: "1px solid var(--border)",
-                    }}
-                  >
-                    {stat.icon}
-                  </div>
-                  <div>
-                    {stat.isText ? (
-                      <p className="text-sm text-[var(--gris-calido)] font-medium leading-snug">
-                        {stat.label}
-                      </p>
-                    ) : (
-                      <>
-                        <StatsCounter value={stat.value} suffix={stat.suffix} />
-                        <p className="text-sm text-[var(--gris-calido)] mt-1.5 font-medium leading-snug max-w-[12ch] mx-auto">
-                          {stat.label}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </AnimatedSection>
+      <section aria-label="Alcance de la fundación" className="border-b border-[var(--border)] bg-[var(--papel)]">
+        <div className="section-container !py-0">
+          <div className="grid sm:grid-cols-3">
+            {trustSignals.map((signal, index) => (
+              <div
+                key={signal.label}
+                className={`py-6 sm:px-7 ${index > 0 ? "border-t border-[var(--border)] sm:border-l sm:border-t-0" : ""}`}
+              >
+                <p className="text-xl text-[var(--verde-profundo)]" style={{ fontFamily: "var(--font-heading)" }}>
+                  {signal.value}
+                </p>
+                <p className="mt-1 text-sm text-[var(--gris-calido)]">{signal.label}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── DONATION BANNER — alto impacto ─── */}
-      <DonationBanner />
-
-      {/* ─── LATEST NEWS ─── */}
-      <section
-        id="ultimas-noticias"
-        className="relative bg-[var(--crema)] overflow-hidden"
-      >
-        <ParallaxLayer
-          speed={0.4}
-          rotate={6}
-          aria-hidden
-          className="absolute top-10 -right-24 w-[360px] h-[360px] rounded-[40%] pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--verde-palido), transparent)",
-            opacity: 0.6,
-            filter: "blur(30px)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-
-        <div className="section-container relative z-10">
+      <section id="mision" className="dark-section">
+        <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
-            <div className="mb-12">
-              <span className="section-label">Noticias</span>
-              <h2>Últimas novedades</h2>
+            <div className="grid gap-9 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)] lg:items-end">
+              <div>
+                <span className="section-label !text-[var(--dorado-suave)]">Nuestra razón de ser</span>
+                <h2 className="section-title max-w-4xl !text-white">
+                  El cambio climático se siente acá. La respuesta también puede empezar acá.
+                </h2>
+              </div>
+              <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">
+                Cuidamos humedales, biodiversidad y comunidades a través de una acción sostenida,
+                cercana y colectiva.
+              </p>
             </div>
           </AnimatedSection>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {latestNoticias.length === 0 ? (
-              <AnimatedSection>
-                <div className="md:col-span-3 rounded-[28px] border border-[var(--border)] bg-white/70 px-6 py-12 text-center shadow-[0_24px_80px_rgba(11,61,46,0.08)] backdrop-blur-sm">
-                  <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--verde-hoja)]/70 mb-3">
-                    Noticias en preparación
-                  </p>
-                  <h3 className="text-2xl mb-3">Todavía no hay novedades publicadas</h3>
-                  <p className="text-[var(--gris-calido)] max-w-xl mx-auto">
-                    Las noticias que se publiquen desde el panel de administración aparecerán acá automáticamente.
-                  </p>
-                </div>
-              </AnimatedSection>
-            ) : (
-              latestNoticias.map((noticia, i) => {
-                const cover =
-                  noticia.imagen_url ??
-                  fallbackNewsCovers[i % fallbackNewsCovers.length];
+      <ImpactSection />
 
-                return (
-                  <AnimatedSection key={noticia.id} delay={i * 100}>
-                    <Link
-                      href={`/noticias/${noticia.id}`}
-                      className="group block relative overflow-hidden rounded-2xl"
-                      style={{ minHeight: 320 }}
-                    >
-                      <Image
-                        src={cover}
-                        alt={noticia.titulo}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        quality={75}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#071f17]/90 via-[#0B3D2E]/35 to-transparent" />
-                      <div className="absolute inset-0 flex flex-col justify-end p-5">
-                        <div className="flex gap-1.5 flex-wrap mb-2">
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/15 text-white/85 backdrop-blur-sm border border-white/20">
-                            noticias
-                          </span>
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/15 text-white/85 backdrop-blur-sm border border-white/20">
-                            correntinos
-                          </span>
-                        </div>
-                        <h3 className="!text-white text-base font-bold leading-snug mb-1.5 line-clamp-2">
-                          {noticia.titulo}
-                        </h3>
-                        <p className="text-white/60 text-xs line-clamp-2 mb-3">
-                          {getNoticiaExcerpt(noticia.contenido, 120)}
-                        </p>
-                        <div className="flex items-center justify-between gap-3">
-                          <time className="text-white/45 text-[11px]">
-                            {noticia.fecha_publicacion
-                              ? new Date(noticia.fecha_publicacion).toLocaleDateString("es-AR", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })
-                              : "Sin fecha"}
-                          </time>
-                          <span className="text-[11px] font-semibold text-[var(--dorado)] group-hover:translate-x-0.5 transition-transform duration-300">
-                            Leer →
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </AnimatedSection>
-                );
-              })
-            )}
-          </div>
-
+      <section id="impacto-numeros" className="paper-section">
+        <div className="section-container !py-16 sm:!py-20">
           <AnimatedSection>
-            <div className="text-center mt-10">
-              <Link href="/noticias" className="btn-secondary">
-                Ver todas las noticias →
+            <div className="grid gap-6 border-b border-[var(--border-strong)] pb-8 lg:grid-cols-2 lg:items-end">
+              <div>
+                <span className="section-label">Impacto</span>
+                <h2 className="section-title">Resultados que vuelven al territorio.</h2>
+              </div>
+              <p className="text-[var(--gris-calido)]">
+                Medimos para aprender, rendir cuentas y ampliar el alcance de cada iniciativa.
+              </p>
+            </div>
+          </AnimatedSection>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+            {stats.map((stat, index) => {
+              const Icon = stat.Icon;
+              return (
+                <AnimatedSection key={stat.label} delay={index * 70} className="h-full">
+                  <div className={`flex h-full flex-col py-8 sm:px-6 ${index > 0 ? "border-t border-[var(--border)] sm:border-l sm:border-t-0" : ""}`}>
+                    <Icon size={25} className="text-[var(--verde-hoja)]" />
+                    <div className="mt-10">
+                      <StatsCounter value={stat.value} suffix={stat.suffix} />
+                      <p className="mt-2 text-sm text-[var(--gris-calido)]">{stat.label}</p>
+                    </div>
+                  </div>
+                </AnimatedSection>
+              );
+            })}
+          </div>
+          <AnimatedSection>
+            <p className="flex items-start gap-3 border-t border-[var(--border-strong)] pt-6 text-sm font-semibold leading-relaxed text-[var(--verde-profundo)]">
+              <Globe size={20} className="mt-0.5 shrink-0 text-[var(--verde-hoja)]" />
+              Organizadores de la Cumbre Climática de las Juventudes 2022.
+            </p>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      <section id="ultimas-noticias" className="bg-white">
+        <div className="section-container !py-16 sm:!py-20">
+          <AnimatedSection>
+            <div className="mb-10 flex flex-col justify-between gap-5 border-b border-[var(--border)] pb-7 sm:flex-row sm:items-end">
+              <div>
+                <span className="section-label">Desde el territorio</span>
+                <h2 className="section-title">Historias, aprendizajes y agenda.</h2>
+              </div>
+              <Link href="/noticias" className="action-link">
+                Ver todas las noticias <ArrowRight size={18} />
               </Link>
             </div>
           </AnimatedSection>
-        </div>
-      </section>
 
-      {/* ─── CTA ─── */}
-      <section
-        id="cta-principal"
-        className="relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--verde-profundo) 0%, var(--verde-selva) 50%, var(--verde-hoja) 100%)",
-        }}
-      >
-        {/* Parallax decorative orbs */}
-        <ParallaxLayer
-          speed={0.45}
-          aria-hidden
-          className="absolute -top-40 -right-32 w-[460px] h-[460px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, var(--dorado) 0%, transparent 65%)",
-            opacity: 0.12,
-            filter: "blur(50px)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-        <ParallaxLayer
-          speed={-0.35}
-          scale={0.15}
-          aria-hidden
-          className="absolute -bottom-28 -left-24 w-[360px] h-[360px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, var(--verde-menta) 0%, transparent 70%)",
-            opacity: 0.18,
-            filter: "blur(50px)",
-          }}
-        >
-          <span className="sr-only" />
-        </ParallaxLayer>
-
-        <div className="section-container relative z-10">
-          <AnimatedSection>
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-white mb-6">
-                El cambio empieza con una decisión
-              </h2>
-              <p className="text-lg text-white/70 mb-10 mx-auto">
-                Sumate a la fundación. Ya sea como voluntario, colaborador o
-                difundiendo nuestra causa, tu participación genera impacto real
-                en la lucha contra el cambio climático en Corrientes.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/trabaja-con-nosotros"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-full bg-[var(--dorado)] text-[var(--verde-profundo)] hover:bg-[var(--dorado-suave)] transition-all duration-300 hover:-translate-y-1 shadow-lg"
-                >
-                  Quiero sumarme
-                </Link>
-                <Link
-                  href="/contacto"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-full border-2 border-white/30 text-white hover:bg-white/10 transition-all duration-300 hover:-translate-y-1"
-                >
-                  Contactanos
-                </Link>
+          {featuredNews ? (
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
+              <AnimatedSection>
+                <article className="group grid gap-6 md:grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)] md:items-end">
+                  <Link href={`/noticias/${featuredNews.id}`} className="relative block aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={featuredNews.imagen_url ?? fallbackNewsCovers[0]}
+                      alt={featuredNews.titulo}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 45vw"
+                      quality={88}
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  </Link>
+                  <div className="border-t border-[var(--border-strong)] pt-5">
+                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-[var(--verde-hoja)]">
+                      <Calendar size={16} /> {formatDate(featuredNews.fecha_publicacion)}
+                    </p>
+                    <h3 className="mt-5 text-3xl sm:text-4xl">{featuredNews.titulo}</h3>
+                    <p className="mt-4 line-clamp-3 text-[var(--gris-calido)]">
+                      {getNoticiaExcerpt(featuredNews.contenido, 190)}
+                    </p>
+                    <Link href={`/noticias/${featuredNews.id}`} className="action-link mt-7">
+                      Leer artículo <ArrowRight size={18} />
+                    </Link>
+                  </div>
+                </article>
+              </AnimatedSection>
+              <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+                {latestNoticias.slice(1).map((noticia, index) => (
+                  <AnimatedSection key={noticia.id} delay={index * 85}>
+                    <article className="group grid grid-cols-[7rem_minmax(0,1fr)] gap-4 py-5 sm:grid-cols-[9rem_minmax(0,1fr)]">
+                      <Link href={`/noticias/${noticia.id}`} className="relative aspect-[4/3] overflow-hidden">
+                        <Image
+                          src={noticia.imagen_url ?? fallbackNewsCovers[(index + 1) % fallbackNewsCovers.length]}
+                          alt={noticia.titulo}
+                          fill
+                          sizes="144px"
+                          quality={78}
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        />
+                      </Link>
+                      <div>
+                        <p className="text-xs text-[var(--gris-calido)]">{formatDate(noticia.fecha_publicacion)}</p>
+                        <h3 className="mt-2 !text-xl transition-colors group-hover:!text-[var(--verde-hoja)]">
+                          {noticia.titulo}
+                        </h3>
+                        <Link href={`/noticias/${noticia.id}`} className="action-link mt-3 !text-xs">
+                          Abrir <ArrowRight size={15} />
+                        </Link>
+                      </div>
+                    </article>
+                  </AnimatedSection>
+                ))}
               </div>
             </div>
-          </AnimatedSection>
+          ) : (
+            <AnimatedSection>
+              <div className="border-y border-[var(--border)] py-10">
+                <h3>Las novedades están en camino.</h3>
+                <p className="mt-2 text-[var(--gris-calido)]">
+                  Cuando publiquemos nuevas historias, las vas a encontrar acá.
+                </p>
+              </div>
+            </AnimatedSection>
+          )}
         </div>
       </section>
+
+      <DonationBanner />
+      <ProductsCarousel productos={featuredProductos} />
     </>
   );
 }

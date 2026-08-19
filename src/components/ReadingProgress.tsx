@@ -44,8 +44,7 @@ export default function ReadingProgress() {
         ref={barRef}
         className="h-full origin-left will-change-transform"
         style={{
-          background:
-            "linear-gradient(90deg, var(--verde-hoja), var(--dorado))",
+          background: "var(--dorado)",
           transform: "scaleX(0)",
         }}
       />

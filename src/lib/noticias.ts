@@ -1,6 +1,6 @@
-import "server-only";
-
-import { createServiceClient } from "@/lib/supabase/server";
+import { db } from "@/db";
+import { noticias } from "@/db/schema";
+import { eq, and, ne, desc } from "drizzle-orm";
 import type { Noticia } from "@/types/database";
 
 export type PublicNoticiaPreview = Pick<
@@ -16,48 +16,67 @@ interface GetPublishedNoticiasOptions {
 export async function getPublishedNoticias(
   options: GetPublishedNoticiasOptions = {}
 ) {
-  const supabase = await createServiceClient();
-  let query = supabase
-    .from("noticias")
-    .select("id, titulo, contenido, imagen_url, fecha_publicacion")
-    .eq("publicada", true)
-    .order("fecha_publicacion", { ascending: false });
+  try {
+    const conditions = [eq(noticias.publicada, true)];
 
-  if (options.excludeId) {
-    query = query.neq("id", options.excludeId);
-  }
+    if (options.excludeId) {
+      conditions.push(ne(noticias.id, options.excludeId));
+    }
 
-  if (typeof options.limit === "number") {
-    query = query.limit(options.limit);
-  }
+    const query = db
+      .select({
+        id: noticias.id,
+        titulo: noticias.titulo,
+        contenido: noticias.contenido,
+        imagen_url: noticias.imagen_url,
+        fecha_publicacion: noticias.fecha_publicacion,
+      })
+      .from(noticias)
+      .where(and(...conditions))
+      .orderBy(desc(noticias.fecha_publicacion));
 
-  const { data, error } = await query;
+    if (typeof options.limit === "number") {
+      const res = await query.limit(options.limit);
+      return res.map((r) => ({
+        ...r,
+        fecha_publicacion: r.fecha_publicacion ? r.fecha_publicacion.toISOString() : null,
+      })) as PublicNoticiaPreview[];
+    }
 
-  if (error) {
-    console.error("Error cargando noticias publicadas:", error.message);
+    const res = await query;
+    return res.map((r) => ({
+      ...r,
+      fecha_publicacion: r.fecha_publicacion ? r.fecha_publicacion.toISOString() : null,
+    })) as PublicNoticiaPreview[];
+  } catch (error) {
+    console.error("Error cargando noticias publicadas:", error);
     return [] as PublicNoticiaPreview[];
   }
-
-  return (data ?? []) as PublicNoticiaPreview[];
 }
 
 export async function getPublishedNoticia(id: string) {
-  const supabase = await createServiceClient();
-  const { data, error } = await supabase
-    .from("noticias")
-    .select("*")
-    .eq("id", id)
-    .eq("publicada", true)
-    .single();
+  try {
+    const result = await db
+      .select()
+      .from(noticias)
+      .where(and(eq(noticias.id, id), eq(noticias.publicada, true)))
+      .limit(1);
 
-  if (error) {
-    if (error.code !== "PGRST116") {
-      console.error("Error cargando noticia pública:", error.message);
+    if (!result || result.length === 0) {
+      return null;
     }
+
+    const n = result[0];
+    return {
+      ...n,
+      fecha_creacion: n.fecha_creacion ? n.fecha_creacion.toISOString() : new Date().toISOString(),
+      fecha_publicacion: n.fecha_publicacion ? n.fecha_publicacion.toISOString() : null,
+      actualizado_en: n.actualizado_en ? n.actualizado_en.toISOString() : new Date().toISOString(),
+    } as Noticia;
+  } catch (error) {
+    console.error("Error cargando noticia pública:", error);
     return null;
   }
-
-  return data as Noticia;
 }
 
 export function getNoticiaExcerpt(html: string, maxLength = 160) {

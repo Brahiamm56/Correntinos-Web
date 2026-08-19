@@ -62,22 +62,11 @@ export default async function NoticiaPage({
               priority
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#071f17]/95 via-[#0B3D2E]/65 to-[#0B3D2E]/30" />
+            <div className="absolute inset-0 bg-[#071f17]/72" />
           </>
         ) : (
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(160deg, #071f17 0%, #0B3D2E 40%, #1A5C3A 100%)",
-            }}
-          />
+          <div className="absolute inset-0 bg-[var(--verde-profundo)]" />
         )}
-
-        <div
-          aria-hidden
-          className="absolute top-[30%] right-[20%] w-[300px] h-[300px] rounded-full bg-[var(--dorado)] opacity-[0.05] blur-[80px] pointer-events-none"
-        />
 
         <div className="section-container relative z-10 max-w-4xl mx-auto w-full pb-2">
           <AnimatedSection>
@@ -88,26 +77,14 @@ export default async function NoticiaPage({
               ← Volver a noticias
             </Link>
 
-            <div className="flex gap-2 flex-wrap mb-4">
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/12 text-[var(--dorado-suave)] border border-white/15 backdrop-blur-sm">
-                noticias
-              </span>
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/12 text-[var(--dorado-suave)] border border-white/15 backdrop-blur-sm">
-                correntinos
-              </span>
-            </div>
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.12em] text-[var(--dorado-suave)]">Noticias · Correntinos</p>
 
             <h1 className="!text-white !text-3xl sm:!text-4xl mb-6 leading-tight max-w-4xl">
               {noticia.titulo}
             </h1>
 
-            <div className="flex items-center gap-4 text-sm text-white/50 flex-wrap">
-              <span className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-full bg-[var(--verde-hoja)] flex items-center justify-center text-xs text-white font-bold">
-                  E
-                </span>
-                Equipo Correntinos
-              </span>
+            <div className="flex items-center gap-4 border-t border-white/25 pt-4 text-sm text-white/60 flex-wrap">
+              <span>Equipo Correntinos</span>
               {noticia.fecha_publicacion && (
                 <time>
                   {new Date(noticia.fecha_publicacion).toLocaleDateString("es-AR", {
@@ -132,7 +109,7 @@ export default async function NoticiaPage({
           </AnimatedSection>
 
           <div className="mt-14 pt-8 border-t border-[var(--border)]">
-            <Link href="/noticias" className="btn-secondary text-sm py-2.5 px-5">
+            <Link href="/noticias" className="action-link">
               ← Ver todas las noticias
             </Link>
           </div>
@@ -140,7 +117,7 @@ export default async function NoticiaPage({
       </section>
 
       {relatedNoticias.length > 0 && (
-        <section className="bg-[var(--crema)]">
+        <section className="paper-section border-t border-[var(--border)]">
           <div className="section-container !pt-12 !pb-16">
             <AnimatedSection>
               <h2 className="text-xl mb-8">Seguí leyendo</h2>
@@ -155,31 +132,25 @@ export default async function NoticiaPage({
                   <AnimatedSection key={relatedNoticia.id} delay={index * 80}>
                     <Link
                       href={`/noticias/${relatedNoticia.id}`}
-                      className="group block relative overflow-hidden rounded-xl"
-                      style={{ minHeight: 220 }}
+                      className="group block"
                     >
                       <Image
                         src={cover}
                         alt={relatedNoticia.titulo}
-                        fill
+                        width={640}
+                        height={400}
                         className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         quality={70}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#071f17]/88 via-[#0B3D2E]/30 to-transparent" />
-                      <div className="absolute inset-0 flex flex-col justify-end p-5">
-                        <div className="flex gap-1.5 flex-wrap mb-2">
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/15 text-white/85 border border-white/20">
-                            noticias
-                          </span>
-                        </div>
-                        <h3 className="!text-white text-sm font-bold leading-snug line-clamp-2 mb-1">
+                      <div className="border-b border-[var(--border)] py-4">
+                        <h3 className="text-lg font-bold leading-snug line-clamp-2 mb-1">
                           {relatedNoticia.titulo}
                         </h3>
-                        <p className="text-white/60 text-xs leading-relaxed line-clamp-2 mb-3">
+                        <p className="text-[var(--gris-calido)] text-xs leading-relaxed line-clamp-2 mb-3">
                           {getNoticiaExcerpt(relatedNoticia.contenido, 88)}
                         </p>
-                        <span className="text-[11px] font-semibold text-[var(--dorado)] group-hover:translate-x-0.5 transition-transform duration-300">
+                        <span className="text-[11px] font-semibold text-[var(--verde-hoja)] group-hover:translate-x-0.5 transition-transform duration-300">
                           Leer →
                         </span>
                       </div>

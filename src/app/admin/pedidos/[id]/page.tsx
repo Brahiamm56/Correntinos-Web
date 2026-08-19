@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { getOrden, marcarOrdenProcesada } from "@/app/admin/pedidos/actions";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Download } from "lucide-react";
+import { ClockCircle } from "reicon-react";
 import type { Orden } from "@/types/database";
 
 export default function PedidoDetallePage() {
@@ -13,41 +14,43 @@ export default function PedidoDetallePage() {
 
   const [orden, setOrden] = useState<Orden | null>(null);
   const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState<{ type: "error" | "success"; message: string } | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from("ordenes")
-      .select("*")
-      .eq("id", id)
-      .single()
-      .then(({ data }) => {
-        if (data) setOrden(data as Orden);
-        setLoading(false);
-      });
+    getOrden(id).then(({ data }) => {
+      if (data) setOrden(data);
+      setLoading(false);
+    });
   }, [id]);
 
-  async function marcarProcesado() {
+  async function handleMarcarProcesado() {
     if (!orden) return;
-    const supabase = createClient();
-    await supabase.from("ordenes").update({ estado: "procesado" }).eq("id", orden.id);
+    const res = await marcarOrdenProcesada(orden.id);
+    if (res.error) {
+      setFeedback({ type: "error", message: res.error });
+      return;
+    }
     setOrden({ ...orden, estado: "procesado" });
+    setFeedback({ type: "success", message: "El pedido quedó marcado como procesado." });
 
-    // Stub: send email notification
-    await fetch("/api/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: orden.cliente_email,
-        subject: `Orden ${orden.numero_orden} - Procesada`,
-        html: `<p>Hola ${orden.cliente_nombre}, tu orden ${orden.numero_orden} fue procesada.</p>`,
-      }),
-    });
+    // Send email notification stub
+    try {
+      await fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: orden.cliente_email,
+          subject: `Orden ${orden.numero_orden} - Procesada`,
+          html: `<p>Hola ${orden.cliente_nombre}, tu orden ${orden.numero_orden} fue procesada.</p>`,
+        }),
+      });
+    } catch {
+      // Ignore email errors if email provider not yet configured
+    }
   }
 
   function descargarTicket() {
     if (!orden) return;
-    // Generate a simple text ticket for download
     const ticket = `
 ═══════════════════════════════════════
   FUNDACIÓN CORRENTINOS
@@ -88,8 +91,8 @@ ${orden.productos.map((p) => `  ${p.nombre} x${p.cantidad}  $${(p.precio * p.can
     URL.revokeObjectURL(url);
   }
 
-  if (loading) return <div className="text-gray-400">Cargando...</div>;
-  if (!orden) return <div className="text-gray-400">Orden no encontrada</div>;
+  if (loading) return <p role="status" className="border-b border-gray-200 py-8 text-sm text-gray-500">Cargando pedido...</p>;
+  if (!orden) return <p role="alert" className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">Pedido no encontrado.</p>;
 
   return (
     <div>
@@ -98,30 +101,30 @@ ${orden.productos.map((p) => `  ${p.nombre} x${p.cantidad}  $${(p.precio * p.can
         Volver a pedidos
       </Link>
 
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-300 pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{orden.numero_orden}</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">Detalle del pedido</p><h1 className="mt-2 text-3xl font-bold text-gray-950">{orden.numero_orden}</h1>
           <p className="text-sm text-gray-400">
             {new Date(orden.creado_en).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={descargarTicket} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors">
+          <button onClick={descargarTicket} className="inline-flex min-h-11 items-center gap-2 border-b border-gray-500 px-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950">
             <Download className="w-4 h-4" />
             Descargar Ticket
           </button>
           {orden.estado === "pendiente" && (
-            <button onClick={marcarProcesado} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">
+            <button onClick={handleMarcarProcesado} className="inline-flex min-h-11 items-center gap-2 bg-green-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-green-800">
               <CheckCircle className="w-4 h-4" />
               Marcar Procesado
             </button>
           )}
         </div>
       </div>
+      {feedback && <p role={feedback.type === "error" ? "alert" : "status"} className={`mb-6 border-l-2 px-4 py-3 text-sm ${feedback.type === "error" ? "border-red-600 bg-red-50 text-red-700" : "border-green-600 bg-green-50 text-green-800"}`}>{feedback.message}</p>}
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Cliente */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+        <section className="border-y border-gray-300 bg-white py-6">
           <h2 className="font-bold text-gray-900 mb-4">Datos del Cliente</h2>
           <dl className="space-y-3 text-sm">
             {[
@@ -137,26 +140,24 @@ ${orden.productos.map((p) => `  ${p.nombre} x${p.cantidad}  $${(p.precio * p.can
               </div>
             ))}
           </dl>
-        </div>
+        </section>
 
-        {/* Estado */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+        <section className="border-y border-gray-300 bg-white py-6">
           <h2 className="font-bold text-gray-900 mb-4">Estado</h2>
           <div className="flex items-center gap-3 mb-4">
-            <span className={`text-sm font-semibold px-3 py-1.5 rounded-full ${
-              orden.estado === "procesado" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+            <span className={`flex w-fit items-center gap-1.5 border-b px-1 py-1.5 text-sm font-semibold ${
+              orden.estado === "procesado" ? "border-green-600 text-green-700" : "border-amber-500 text-amber-700"
             }`}>
-              {orden.estado === "procesado" ? "✓ Procesado" : "⏳ Pendiente"}
+              {orden.estado === "procesado" ? <><CheckCircle className="h-4 w-4" /> Procesado</> : <><ClockCircle size={16} /> Pendiente</>}
             </span>
           </div>
           <div className="text-3xl font-bold text-[var(--verde-profundo)]">
             ${Number(orden.total).toLocaleString("es-AR")}
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* Productos */}
-      <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm mt-6">
+      <section className="mt-8 border-y border-gray-300 bg-white py-6">
         <h2 className="font-bold text-gray-900 mb-4">Productos</h2>
         <table className="w-full text-sm">
           <thead>
@@ -186,7 +187,7 @@ ${orden.productos.map((p) => `  ${p.nombre} x${p.cantidad}  $${(p.precio * p.can
             </tr>
           </tfoot>
         </table>
-      </div>
+      </section>
     </div>
   );
 }

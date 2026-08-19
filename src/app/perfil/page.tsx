@@ -3,18 +3,20 @@
 import { useAuthStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { getUserOrders, updateUserName } from "@/app/perfil/actions";
 import Image from "next/image";
 import Link from "next/link";
 import type { Orden } from "@/types/database";
+import { CheckCircle } from "reicon-react";
 
 export default function PerfilPage() {
-  const { user, profile, signOut, loading } = useAuthStore();
+  const { user, profile, signOut, loading, initialize } = useAuthStore();
   const router = useRouter();
   const [ordenes, setOrdenes] = useState<Orden[]>([]);
   const [nombre, setNombre] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -24,15 +26,9 @@ export default function PerfilPage() {
 
   useEffect(() => {
     if (!user) return;
-    const supabase = createClient();
-    supabase
-      .from("ordenes")
-      .select("*")
-      .eq("usuario_id", user.id)
-      .order("creado_en", { ascending: false })
-      .then(({ data }) => {
-        if (data) setOrdenes(data);
-      });
+    getUserOrders().then(({ data }) => {
+      if (data) setOrdenes(data);
+    });
   }, [user]);
 
   async function handleSave(e: React.FormEvent) {
@@ -40,11 +36,16 @@ export default function PerfilPage() {
     if (!user) return;
     const nextNombre = nombre ?? profile?.nombre ?? "";
     setSaving(true);
-    const supabase = createClient();
-    await supabase.from("usuarios").update({ nombre: nextNombre }).eq("id", user.id);
+    setError("");
+    const res = await updateUserName(nextNombre);
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (!res.error) {
+      setSaved(true);
+      await initialize();
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setError(res.error);
+    }
   }
 
   async function handleSignOut() {
@@ -61,16 +62,14 @@ export default function PerfilPage() {
     );
   }
 
-  // Si no hay user, el useEffect redirige a login
   if (!user) return null;
 
-  // Si el profile aún no cargó, mostrar página mínima con opción de salir
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[var(--crema)] pt-28 pb-20">
+      <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
         <div className="max-w-3xl mx-auto px-[var(--section-padding-x)]">
           <h1 className="text-3xl mb-8">Mi Perfil</h1>
-          <div className="glass-card p-8 text-center">
+          <div className="border-y border-[var(--border-strong)] py-8">
             <p className="text-[var(--gris-calido)] mb-6">No se pudo cargar el perfil. Probá cerrando sesión e ingresando nuevamente.</p>
             <button onClick={handleSignOut} className="btn-secondary">
               Cerrar sesión
@@ -82,11 +81,11 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--crema)] pt-28 pb-20">
+    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
       <div className="max-w-3xl mx-auto px-[var(--section-padding-x)]">
         <h1 className="text-3xl mb-8">Mi Perfil</h1>
 
-        <div className="glass-card p-8 mb-8">
+        <section className="mb-10 border-y border-[var(--border-strong)] py-8">
           <div className="flex items-center gap-4 mb-6">
             {profile.foto_perfil ? (
               <Image
@@ -117,38 +116,38 @@ export default function PerfilPage() {
                 type="text"
                 value={nombre ?? profile.nombre ?? ""}
                 onChange={(e) => setNombre(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                className="field"
               />
             </div>
             <div className="flex items-center gap-3">
               <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
                 {saving ? "Guardando..." : "Guardar cambios"}
               </button>
-              {saved && <span className="text-green-600 text-sm">✓ Guardado</span>}
+              {saved && <span role="status" className="inline-flex items-center gap-2 text-sm text-green-700"><CheckCircle size={17} />Guardado</span>}
             </div>
+            {error && <p role="alert" className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
           </form>
-        </div>
+        </section>
 
-        {/* Historial de compras */}
-        <h2 className="text-xl mb-4">Historial de Compras</h2>
+        <h2 className="text-xl mb-4">Historial de pedidos</h2>
         {ordenes.length === 0 ? (
-          <div className="glass-card p-8 text-center">
-            <p className="text-[var(--gris-calido)] mb-4">Aún no tenés compras.</p>
+          <div className="border-y border-[var(--border)] py-8">
+            <p className="text-[var(--gris-calido)] mb-4">Aún no tenés pedidos.</p>
             <Link href="/tienda" className="btn-primary">
               Ir a la tienda
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="border-t border-[var(--border-strong)]">
             {ordenes.map((orden) => (
-              <div key={orden.id} className="glass-card p-5">
+              <div key={orden.id} className="border-b border-[var(--border)] py-5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-bold text-sm">{orden.numero_orden}</span>
                   <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    className={`inline-flex items-center gap-2 border-b px-1 py-1 text-xs font-semibold ${
                       orden.estado === "procesado"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
+                        ? "border-green-600 text-green-700"
+                        : "border-amber-500 text-amber-700"
                     }`}
                   >
                     {orden.estado === "procesado" ? "Procesado" : "Pendiente"}
@@ -163,7 +162,7 @@ export default function PerfilPage() {
                     })}
                   </p>
                   <p>
-                    {orden.productos.length} producto{orden.productos.length !== 1 ? "s" : ""} — <strong className="text-[var(--verde-profundo)]">${orden.total.toLocaleString("es-AR")}</strong>
+                    {orden.productos.length} producto{orden.productos.length !== 1 ? "s" : ""} — <strong className="text-[var(--verde-profundo)]">${Number(orden.total).toLocaleString("es-AR")}</strong>
                   </p>
                 </div>
               </div>

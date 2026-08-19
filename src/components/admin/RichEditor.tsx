@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import {
   Bold,
   Italic,
@@ -61,6 +61,10 @@ export default function RichEditor({
 }: RichEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const isProgrammaticUpdate = useRef(false);
+  const savedSelectionRef = useRef<Range | null>(null);
+  const [linkEditorOpen, setLinkEditorOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkError, setLinkError] = useState("");
 
   // Initial value hydration
   useEffect(() => {
@@ -74,6 +78,7 @@ export default function RichEditor({
 
   const exec = useCallback((command: string, val?: string) => {
     editorRef.current?.focus();
+    // Se aísla esta API para preservar el HTML histórico mientras se evalúa un editor mantenido.
     document.execCommand(command, false, val);
     // Dispatch input to trigger onChange
     editorRef.current?.dispatchEvent(new Event("input", { bubbles: true }));
@@ -87,35 +92,64 @@ export default function RichEditor({
     requestAnimationFrame(() => { isProgrammaticUpdate.current = false; });
   }, [onChange]);
 
-  const handleInsertLink = useCallback(() => {
+  const openLinkEditor = useCallback(() => {
     const selection = window.getSelection();
-    const text = selection?.toString();
-    const url = prompt("URL del enlace:");
-    if (!url) return;
-    if (text) {
-      exec("createLink", url);
-    } else {
-      const anchor = `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-      exec("insertHTML", anchor);
+    savedSelectionRef.current = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+    setLinkError("");
+    setLinkEditorOpen(true);
+  }, []);
+
+  const handleInsertLink = useCallback(() => {
+    const candidate = linkUrl.trim();
+    if (!candidate) {
+      setLinkError("Ingresá una URL");
+      return;
     }
-  }, [exec]);
+
+    let normalized: string;
+    try {
+      const parsed = new URL(/^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`);
+      if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error("Protocolo no permitido");
+      normalized = parsed.toString();
+    } catch {
+      setLinkError("Ingresá una dirección web válida");
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (savedSelectionRef.current && selection) {
+      selection.removeAllRanges();
+      selection.addRange(savedSelectionRef.current);
+    }
+    if (selection?.toString()) {
+      exec("createLink", normalized);
+    } else {
+      const anchor = document.createElement("a");
+      anchor.href = normalized;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.textContent = normalized;
+      exec("insertHTML", anchor.outerHTML);
+    }
+    setLinkUrl("");
+    setLinkEditorOpen(false);
+  }, [exec, linkUrl]);
 
   const handleToolbarAction = useCallback(
     (item: Extract<ToolbarItem, { type: "button" }>) => {
       if (item.command === "link") {
-        handleInsertLink();
+        openLinkEditor();
         return;
       }
 
       exec(item.command, item.value);
     },
-    [exec, handleInsertLink]
+    [exec, openLinkEditor]
   );
 
   return (
-    <div className="rich-editor border border-gray-200 rounded-lg overflow-hidden focus-within:border-[var(--verde-hoja)] focus-within:ring-1 focus-within:ring-[var(--verde-hoja)] transition-all">
-      {/* Toolbar */}
-      <div className="flex items-center flex-wrap gap-0.5 px-2 py-2 bg-gray-50 border-b border-gray-100">
+    <div className="rich-editor overflow-hidden border border-gray-300 transition-all focus-within:border-[var(--verde-hoja)] focus-within:ring-1 focus-within:ring-[var(--verde-hoja)]">
+      <div role="toolbar" aria-label="Formato del contenido" className="flex flex-wrap items-center gap-0.5 border-b border-gray-100 bg-gray-50 px-2 py-2">
         {toolbarItems.map((item, i) =>
           item.type === "separator" ? (
             <div key={i} className="w-px h-5 bg-gray-200 mx-0.5 flex-shrink-0" />
@@ -124,11 +158,12 @@ export default function RichEditor({
               key={i}
               type="button"
               title={item.title}
+              aria-label={item.title}
               onMouseDown={(e) => {
-                e.preventDefault(); // Prevents editor from losing focus
+                e.preventDefault();
                 handleToolbarAction(item);
               }}
-              className="p-1.5 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition-colors flex-shrink-0"
+              className="flex-shrink-0 p-1.5 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-900"
             >
               <item.icon className="w-3.5 h-3.5" />
             </button>
@@ -136,7 +171,8 @@ export default function RichEditor({
         )}
       </div>
 
-      {/* Editable area */}
+      {linkEditorOpen && <div className="border-b border-gray-200 bg-white p-3"><label htmlFor="editor-link-url" className="mb-1.5 block text-xs font-semibold text-gray-700">Dirección del enlace</label><div className="flex flex-col gap-2 sm:flex-row"><input id="editor-link-url" type="url" value={linkUrl} onChange={(event) => setLinkUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); handleInsertLink(); } }} className="min-h-10 flex-1 border border-gray-300 px-3 text-sm focus:border-[var(--verde-hoja)] focus:outline-none" placeholder="https://sitio.org" autoFocus /><button type="button" onClick={handleInsertLink} className="bg-[var(--verde-profundo)] px-4 text-sm font-semibold text-white">Insertar</button><button type="button" onClick={() => { setLinkEditorOpen(false); setLinkError(""); }} className="border-b border-gray-400 px-2 text-sm font-semibold text-gray-600">Cancelar</button></div>{linkError && <p role="alert" className="mt-2 text-xs text-red-700">{linkError}</p>}</div>}
+
       <div
         ref={editorRef}
         contentEditable
@@ -146,6 +182,9 @@ export default function RichEditor({
         style={{ minHeight, fontFamily: "var(--font-body)" }}
         data-placeholder={placeholder}
         spellCheck
+        role="textbox"
+        aria-multiline="true"
+        aria-label="Contenido de la noticia"
       />
     </div>
   );

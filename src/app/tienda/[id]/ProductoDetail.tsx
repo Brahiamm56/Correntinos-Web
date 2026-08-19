@@ -6,11 +6,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCartStore } from "@/store/cart";
 import { useAuthStore } from "@/store/auth";
-import { ArrowLeft, Lock, Minus, Plus, ShoppingCart } from "lucide-react";
+import { Add, ArrowLeft, CheckCircle, Lock, Minus, Package, ShoppingCart } from "reicon-react";
 import type { Producto, Categoria } from "@/types/database";
 
 interface Props {
-  producto: Producto & { categoria: Categoria | null };
+  producto: Omit<Producto, "categoria"> & { categoria: Categoria | null };
 }
 
 export default function ProductoDetail({ producto }: Props) {
@@ -20,7 +20,7 @@ export default function ProductoDetail({ producto }: Props) {
   const qtyFromQuery = Number(searchParams.get("qty") || "1");
   const buyNowFromQuery = searchParams.get("buyNow") === "1";
   const [cantidad, setCantidad] = useState(1);
-  const { addItem, getCount } = useCartStore();
+  const { addItem } = useCartStore();
   const { user, profile, loading: authLoading } = useAuthStore();
   const [added, setAdded] = useState(false);
   const [buyNowOpen, setBuyNowOpen] = useState(false);
@@ -38,22 +38,27 @@ export default function ProductoDetail({ producto }: Props) {
     const safeQty = Number.isFinite(qtyFromQuery)
       ? Math.min(Math.max(1, qtyFromQuery), producto.stock)
       : 1;
-    setCantidad(safeQty);
+    const frame = window.requestAnimationFrame(() => setCantidad(safeQty));
+    return () => window.cancelAnimationFrame(frame);
   }, [producto.stock, qtyFromQuery]);
 
   useEffect(() => {
     if (profile) {
-      setFormData((prev) => ({
-        ...prev,
-        cliente_nombre: prev.cliente_nombre || profile.nombre || "",
-        cliente_email: prev.cliente_email || profile.email || "",
-      }));
+      const frame = window.requestAnimationFrame(() => {
+        setFormData((prev) => ({
+          ...prev,
+          cliente_nombre: prev.cliente_nombre || profile.nombre || "",
+          cliente_email: prev.cliente_email || profile.email || "",
+        }));
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
   }, [profile]);
 
   useEffect(() => {
     if (!authLoading && user && buyNowFromQuery) {
-      setBuyNowOpen(true);
+      const frame = window.requestAnimationFrame(() => setBuyNowOpen(true));
+      return () => window.cancelAnimationFrame(frame);
     }
   }, [authLoading, buyNowFromQuery, user]);
 
@@ -137,29 +142,17 @@ export default function ProductoDetail({ producto }: Props) {
   const total = producto.precio * cantidad;
 
   return (
-    <div className="min-h-screen bg-[var(--crema)] pt-28 pb-20">
+    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
       <div className="max-w-5xl mx-auto px-[var(--section-padding-x)]">
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8">
           <Link href="/tienda" className="inline-flex items-center gap-2 text-sm text-[var(--gris-calido)] hover:text-[var(--verde-profundo)] transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Volver a la tienda
           </Link>
-          <Link
-            href="/tienda/carrito"
-            className="relative inline-flex items-center gap-2 text-sm font-semibold text-[var(--verde-profundo)]"
-          >
-            <ShoppingCart className="w-5 h-5" />
-            {getCount() > 0 && (
-              <span className="absolute -top-2 -right-4 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
-                {getCount()}
-              </span>
-            )}
-          </Link>
         </div>
 
         <div className="grid md:grid-cols-2 gap-10">
-          {/* Image */}
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-white border border-[var(--border)]">
+          <div className="relative aspect-square overflow-hidden bg-white">
             {producto.imagen_url ? (
               <Image
                 src={producto.imagen_url}
@@ -170,19 +163,16 @@ export default function ProductoDetail({ producto }: Props) {
                 priority
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-8xl bg-[var(--verde-palido)]">
-                🌿
-              </div>
+              <div className="w-full h-full flex items-center justify-center text-[var(--verde-hoja)] bg-[var(--verde-palido)]"><Package size={72} /></div>
             )}
             {producto.stock === 0 && (
-              <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+              <div className="absolute left-4 top-4 bg-red-700 px-3 py-1 text-xs font-bold text-white">
                 Agotado
               </div>
             )}
           </div>
 
-          {/* Info */}
-          <div>
+          <div className="border-t border-[var(--border-strong)] pt-6">
             {producto.categoria && (
               <span className="text-xs font-semibold text-[var(--verde-claro)] uppercase tracking-wider">
                 {producto.categoria.nombre}
@@ -206,19 +196,23 @@ export default function ProductoDetail({ producto }: Props) {
             {producto.stock > 0 && (
               <>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center border-2 border-[var(--border)] rounded-xl overflow-hidden">
+                  <div className="flex items-center border-y border-[var(--border)]">
                     <button
+                      type="button"
                       onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-                      className="px-3 py-2 hover:bg-gray-50 transition-colors"
+                      className="min-h-11 px-3 transition-colors hover:bg-white"
+                      aria-label="Reducir cantidad"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
                     <span className="px-4 py-2 font-bold min-w-[3rem] text-center">{cantidad}</span>
                     <button
+                      type="button"
                       onClick={() => setCantidad(Math.min(producto.stock, cantidad + 1))}
-                      className="px-3 py-2 hover:bg-gray-50 transition-colors"
+                      className="min-h-11 px-3 transition-colors hover:bg-white"
+                      aria-label="Aumentar cantidad"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Add className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -229,20 +223,20 @@ export default function ProductoDetail({ producto }: Props) {
                     className="btn-primary w-full sm:w-auto justify-center"
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    {added ? "✓ Agregado al carrito" : "Agregar al carrito"}
+                    {added ? <><CheckCircle className="h-4 w-4" /> Agregado al carrito</> : "Agregar al carrito"}
                   </button>
 
                   <button
                     onClick={handleBuyNow}
                     disabled={authLoading}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border-2 border-[var(--verde-profundo)] text-[var(--verde-profundo)] font-semibold hover:bg-[var(--verde-profundo)] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="action-link justify-center disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {!user && <Lock className="w-4 h-4" />}
                     {authLoading
                       ? "Verificando..."
                       : user
-                      ? "Comprar ahora"
-                      : "Iniciar sesión para comprar"}
+                      ? "Hacer el pedido"
+                      : "Iniciar sesión para pedir"}
                   </button>
                 </div>
 
@@ -261,14 +255,14 @@ export default function ProductoDetail({ producto }: Props) {
             ref={checkoutRef}
             className="mt-14 grid lg:grid-cols-[1.3fr_0.7fr] gap-6 scroll-mt-32"
           >
-            <form onSubmit={handleQuickOrder} className="glass-card p-6 sm:p-8 space-y-5">
+            <form onSubmit={handleQuickOrder} className="space-y-5 border-y border-[var(--border-strong)] py-7 sm:px-4">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--verde-hoja)]/70 mb-2">
                   Compra rápida
                 </p>
                 <h2 className="text-2xl mb-2">Finalizá tu pedido desde este producto</h2>
                 <p className="text-sm text-[var(--gris-calido)] max-w-2xl">
-                  Completá tus datos de envío para cerrar esta compra online sin pasar por el carrito.
+                  Completá tus datos de envío para registrar el pedido sin pasar por el carrito. El envío se coordina por separado.
                 </p>
               </div>
 
@@ -284,7 +278,7 @@ export default function ProductoDetail({ producto }: Props) {
                     required
                     value={formData.cliente_nombre}
                     onChange={handleFieldChange}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                    className="field"
                   />
                 </div>
 
@@ -299,7 +293,7 @@ export default function ProductoDetail({ producto }: Props) {
                     required
                     value={formData.cliente_email}
                     onChange={handleFieldChange}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                    className="field"
                   />
                 </div>
 
@@ -314,7 +308,7 @@ export default function ProductoDetail({ producto }: Props) {
                     required
                     value={formData.cliente_telefono}
                     onChange={handleFieldChange}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                    className="field"
                     placeholder="+54 379..."
                   />
                 </div>
@@ -330,7 +324,7 @@ export default function ProductoDetail({ producto }: Props) {
                     required
                     value={formData.cliente_ciudad}
                     onChange={handleFieldChange}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                    className="field"
                     placeholder="Corrientes"
                   />
                 </div>
@@ -347,13 +341,13 @@ export default function ProductoDetail({ producto }: Props) {
                   required
                   value={formData.cliente_direccion}
                   onChange={handleFieldChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                  className="field"
                   placeholder="Calle, número, piso/depto"
                 />
               </div>
 
               {orderError && (
-                <p className="text-red-600 text-sm bg-red-50 px-4 py-3 rounded-xl">{orderError}</p>
+                <p role="alert" className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{orderError}</p>
               )}
 
               <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-2">
@@ -362,7 +356,7 @@ export default function ProductoDetail({ producto }: Props) {
                   disabled={orderLoading}
                   className="btn-primary justify-center disabled:opacity-50"
                 >
-                  {orderLoading ? "Procesando pedido..." : `Confirmar compra por $${total.toLocaleString("es-AR")}`}
+                  {orderLoading ? "Registrando pedido..." : `Confirmar pedido por $${total.toLocaleString("es-AR")}`}
                 </button>
 
                 <button
@@ -375,12 +369,12 @@ export default function ProductoDetail({ producto }: Props) {
               </div>
             </form>
 
-            <aside className="glass-card p-6 h-fit lg:sticky lg:top-28">
+            <aside className="h-fit border-y border-[var(--border-strong)] py-6 lg:sticky lg:top-28">
               <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--verde-hoja)]/70 mb-3">
                 Resumen del pedido
               </p>
               <div className="flex gap-4 items-start mb-5">
-                <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-white border border-[var(--border)] flex-shrink-0">
+                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden bg-white">
                   {producto.imagen_url ? (
                     <Image
                       src={producto.imagen_url}
@@ -390,7 +384,7 @@ export default function ProductoDetail({ producto }: Props) {
                       sizes="80px"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl bg-[var(--verde-palido)]">🌿</div>
+                    <div className="w-full h-full flex items-center justify-center bg-[var(--verde-palido)] text-[var(--verde-hoja)]"><Package size={25} /></div>
                   )}
                 </div>
 

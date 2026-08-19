@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { Save } from "lucide-react";
+import { getConfiguracion, updateConfiguracion } from "@/app/admin/configuracion/actions";
+import { CheckCircle, Save } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminConfiguracionPage() {
   const [form, setForm] = useState({
@@ -17,24 +18,17 @@ export default function AdminConfiguracionPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from("configuracion")
-      .select("*")
-      .order("actualizado_en", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) {
-          setForm({
-            id: data.id,
-            email_fundacion: data.email_fundacion || "",
-            telefono_fundacion: data.telefono_fundacion || "",
-            texto_home: data.texto_home || "",
-          });
-        }
-        setFetching(false);
-      });
+    getConfiguracion().then(({ data }) => {
+      if (data) {
+        setForm({
+          id: data.id,
+          email_fundacion: data.email_fundacion || "",
+          telefono_fundacion: data.telefono_fundacion || "",
+          texto_home: data.texto_home || "",
+        });
+      }
+      setFetching(false);
+    });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -42,18 +36,14 @@ export default function AdminConfiguracionPage() {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("configuracion")
-      .update({
-        email_fundacion: form.email_fundacion,
-        telefono_fundacion: form.telefono_fundacion,
-        texto_home: form.texto_home,
-      })
-      .eq("id", form.id);
+    const res = await updateConfiguracion(form.id, {
+      email_fundacion: form.email_fundacion,
+      telefono_fundacion: form.telefono_fundacion,
+      texto_home: form.texto_home,
+    });
 
-    if (error) {
-      setError(error.message);
+    if (res.error) {
+      setError(res.error);
     } else {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -61,14 +51,14 @@ export default function AdminConfiguracionPage() {
     setLoading(false);
   }
 
-  if (fetching) return <div className="text-gray-400">Cargando...</div>;
+  if (fetching) return <p role="status" className="border-b border-gray-200 py-8 text-sm text-gray-500">Cargando configuración...</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Configuración</h1>
+      <header className="flex flex-col gap-4 border-b border-gray-300 pb-6 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">Sitio público</p><h1 className="mt-2 text-3xl font-bold text-gray-950">Configuración</h1><p className="mt-2 max-w-2xl text-sm text-gray-500">Estos datos actualizan el hero, el pie, Contacto y Donaciones.</p></div><Link href="/" target="_blank" className="text-sm font-semibold text-[var(--verde-hoja)] hover:underline">Ver sitio</Link></header>
 
-      <form onSubmit={handleSubmit} className="max-w-xl space-y-5">
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm space-y-4">
+      <form onSubmit={handleSubmit} className="mt-8 max-w-2xl space-y-5">
+        <div className="space-y-5 border-y border-gray-300 bg-white py-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
               Email de la fundación
@@ -78,7 +68,7 @@ export default function AdminConfiguracionPage() {
               type="email"
               value={form.email_fundacion}
               onChange={(e) => setForm({ ...form, email_fundacion: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[var(--verde-claro)] focus:ring-1 focus:ring-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+              className="w-full border border-gray-300 px-4 py-3 text-sm transition-colors focus:border-[var(--verde-hoja)] focus:outline-none"
             />
           </div>
           <div>
@@ -90,7 +80,7 @@ export default function AdminConfiguracionPage() {
               type="tel"
               value={form.telefono_fundacion}
               onChange={(e) => setForm({ ...form, telefono_fundacion: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[var(--verde-claro)] focus:ring-1 focus:ring-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+              className="w-full border border-gray-300 px-4 py-3 text-sm transition-colors focus:border-[var(--verde-hoja)] focus:outline-none"
             />
           </div>
           <div>
@@ -102,23 +92,23 @@ export default function AdminConfiguracionPage() {
               value={form.texto_home}
               onChange={(e) => setForm({ ...form, texto_home: e.target.value })}
               rows={4}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[var(--verde-claro)] focus:ring-1 focus:ring-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+              className="w-full border border-gray-300 px-4 py-3 text-sm transition-colors focus:border-[var(--verde-hoja)] focus:outline-none"
             />
           </div>
         </div>
 
-        {error && <p className="text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>}
+        {error && <p role="alert" className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
         <div className="flex items-center gap-3">
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--verde-profundo)] text-white font-medium hover:bg-[var(--verde-selva)] transition-colors disabled:opacity-50"
+            className="inline-flex min-h-11 items-center gap-2 bg-[var(--verde-profundo)] px-6 text-sm font-semibold text-white transition-colors hover:bg-[var(--verde-selva)] disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             {loading ? "Guardando..." : "Guardar Configuración"}
           </button>
-          {saved && <span className="text-green-600 text-sm font-medium">✓ Guardado correctamente</span>}
+          {saved && <span role="status" className="inline-flex items-center gap-2 text-sm font-medium text-green-700"><CheckCircle className="h-4 w-4" />Guardado correctamente</span>}
         </div>
       </form>
     </div>

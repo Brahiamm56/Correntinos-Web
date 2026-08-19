@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AuthProvider from "@/components/AuthProvider";
+import { getPublicConfiguration } from "@/lib/configuracion";
 
 const headingFont = DM_Serif_Display({
   variable: "--font-heading",
@@ -64,11 +65,13 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://correntinosclim.org"),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const configuration = await getPublicConfiguration();
+
   return (
     <html
       lang="es"
@@ -78,7 +81,7 @@ export default function RootLayout({
         <AuthProvider>
           <Header />
           <main className="flex-1">{children}</main>
-          <Footer />
+          <Footer email={configuration.email} phone={configuration.phone} />
         </AuthProvider>
       </body>
     </html>

@@ -32,12 +32,21 @@ export interface Producto {
   descripcion: string | null;
   precio: number;
   stock: number;
+  variantes?: ProductoVariante[] | null;
   imagen_url: string | null;
   categoria_id: string | null;
   categoria?: Categoria;
   activo: boolean;
   creado_en: string;
   actualizado_en: string;
+}
+
+export interface ProductoVariante {
+  id: string;
+  talle?: string;
+  color?: string;
+  sku?: string;
+  stock: number;
 }
 
 export interface OrdenProducto {

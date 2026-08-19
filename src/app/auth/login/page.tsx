@@ -4,7 +4,8 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { authClient } from "@/lib/auth-client";
+import { useAuthStore } from "@/store/auth";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -14,66 +15,66 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
+  const { initialize } = useAuthStore();
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data, error: signInError } = await authClient.signIn.email({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message === "Invalid login credentials"
-        ? "Email o contraseña incorrectos"
-        : error.message);
-      setLoading(false);
-      return;
-    }
+      if (signInError) {
+        setError(
+          signInError.message?.includes("Invalid") || signInError.message?.includes("credentials")
+            ? "Email o contraseña incorrectos"
+            : signInError.message || "Error al iniciar sesión"
+        );
+        setLoading(false);
+        return;
+      }
 
-    // Si hay redirect explícito (ej: venía de /admin), usarlo
-    if (redirect !== "/") {
-      router.push(redirect);
-      router.refresh();
-      return;
-    }
+      await initialize();
 
-    // Si no hay redirect, verificar rol y redirigir según corresponda
-    if (data.user) {
-      const { data: profile } = await supabase
-        .from("usuarios")
-        .select("rol")
-        .eq("id", data.user.id)
-        .single();
-
-      if (profile?.rol === "admin") {
+      const user = data?.user as { role?: string } | undefined;
+      if (redirect !== "/") {
+        router.push(redirect);
+      } else if (user?.role === "admin") {
         router.push("/admin");
       } else {
         router.push("/");
       }
-    } else {
-      router.push("/");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error inesperado");
+      setLoading(false);
     }
-    router.refresh();
   }
 
   async function handleGoogleLogin() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-      },
-    });
+    setError("");
+    try {
+      const result = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: redirect !== "/" ? redirect : "/admin",
+      });
+      if (result.error) setError("El ingreso con Google no está disponible en este momento.");
+    } catch {
+      setError("El ingreso con Google no está disponible en este momento.");
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--crema)]" style={{ paddingTop: 100 }}>
-      <div className="w-full max-w-md mx-4">
-        <div className="glass-card p-8">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--papel)] px-5 pb-16 pt-32">
+      <div className="w-full max-w-md">
+        <div className="border-y border-[var(--border)] py-9 sm:px-3">
           <div className="text-center mb-8">
             <Link href="/" className="inline-block mb-4">
-              <Image src="/correntinos-logo.png" alt="Logo" width={56} height={56} />
+              <Image src="/correntinos-logo.png" alt="Fundación Correntinos Contra el Cambio Climático" width={64} height={64} className="h-16 w-16 object-contain" />
             </Link>
             <h1 className="text-2xl mb-2">Iniciar Sesión</h1>
             <p className="text-sm text-[var(--gris-calido)]">
@@ -83,7 +84,8 @@ function LoginForm() {
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border-2 border-[var(--border-strong)] bg-white hover:bg-gray-50 transition-colors mb-6 font-semibold text-sm"
+            type="button"
+            className="mb-6 flex min-h-12 w-full items-center justify-center gap-3 border border-[var(--border-strong)] bg-transparent px-4 py-3 text-sm font-semibold transition-colors hover:border-[var(--verde-hoja)] hover:bg-white"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -116,7 +118,7 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                className="field text-sm"
                 placeholder="tu@email.com"
               />
             </div>
@@ -130,13 +132,13 @@ function LoginForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                className="field text-sm"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+              <p role="alert" className="border-l-2 border-red-600 py-2 pl-3 text-sm text-red-700">{error}</p>
             )}
 
             <button

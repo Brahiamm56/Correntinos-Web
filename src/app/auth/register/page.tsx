@@ -1,20 +1,22 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { authClient } from "@/lib/auth-client";
+import { useAuthStore } from "@/store/auth";
 
 function RegisterForm() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
+  const { initialize } = useAuthStore();
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -27,63 +29,48 @@ function RegisterForm() {
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: nombre },
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-      },
-    });
+    try {
+      const { error: signUpError } = await authClient.signUp.email({
+        name: nombre,
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (signUpError) {
+        setError(signUpError.message || "Error al crear la cuenta");
+        setLoading(false);
+        return;
+      }
+
+      await initialize();
+      router.push(redirect);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error inesperado");
       setLoading(false);
-      return;
     }
-
-    setSuccess(true);
-    setLoading(false);
   }
 
   async function handleGoogleLogin() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-      },
-    });
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--crema)]" style={{ paddingTop: 100 }}>
-        <div className="w-full max-w-md mx-4">
-          <div className="glass-card p-8 text-center">
-            <div className="text-5xl mb-4">📧</div>
-            <h1 className="text-2xl mb-3">¡Revisá tu email!</h1>
-            <p className="text-[var(--gris-calido)] text-sm mb-6">
-              Te enviamos un link de confirmación a <strong>{email}</strong>.
-              Hacé click en el link para activar tu cuenta.
-            </p>
-            <Link href="/auth/login" className="btn-secondary">
-              Volver al login
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    setError("");
+    try {
+      const result = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: redirect !== "/" ? redirect : "/",
+      });
+      if (result.error) setError("El registro con Google no está disponible en este momento.");
+    } catch {
+      setError("El registro con Google no está disponible en este momento.");
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--crema)]" style={{ paddingTop: 100 }}>
-      <div className="w-full max-w-md mx-4">
-        <div className="glass-card p-8">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--papel)] px-5 pb-16 pt-32">
+      <div className="w-full max-w-md">
+        <div className="border-y border-[var(--border)] py-9 sm:px-3">
           <div className="text-center mb-8">
             <Link href="/" className="inline-block mb-4">
-              <Image src="/correntinos-logo.png" alt="Logo" width={56} height={56} />
+              <Image src="/correntinos-logo.png" alt="Fundación Correntinos Contra el Cambio Climático" width={64} height={64} className="h-16 w-16 object-contain" />
             </Link>
             <h1 className="text-2xl mb-2">Crear Cuenta</h1>
             <p className="text-sm text-[var(--gris-calido)]">
@@ -93,7 +80,8 @@ function RegisterForm() {
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border-2 border-[var(--border-strong)] bg-white hover:bg-gray-50 transition-colors mb-6 font-semibold text-sm"
+            type="button"
+            className="mb-6 flex min-h-12 w-full items-center justify-center gap-3 border border-[var(--border-strong)] bg-transparent px-4 py-3 text-sm font-semibold transition-colors hover:border-[var(--verde-hoja)] hover:bg-white"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -126,7 +114,7 @@ function RegisterForm() {
                 required
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                className="field text-sm"
                 placeholder="Tu nombre"
               />
             </div>
@@ -140,7 +128,7 @@ function RegisterForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                className="field text-sm"
                 placeholder="tu@email.com"
               />
             </div>
@@ -155,13 +143,13 @@ function RegisterForm() {
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                className="field text-sm"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+              <p role="alert" className="border-l-2 border-red-600 py-2 pl-3 text-sm text-red-700">{error}</p>
             )}
 
             <button

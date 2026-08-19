@@ -42,15 +42,16 @@ export default function PedidosAdminClient({ ordenes }: Props) {
       o.cliente_nombre,
       o.cliente_email,
       o.cliente_telefono,
-      `"${o.cliente_direccion}"`,
+      o.cliente_direccion,
       o.cliente_ciudad,
-      `"${o.productos.map((p) => `${p.nombre} x${p.cantidad}`).join(", ")}"`,
+      o.productos.map((p) => `${p.nombre} x${p.cantidad}`).join(", "),
       o.total,
       o.estado,
     ]);
 
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const csvCell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+    const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+    const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -61,18 +62,18 @@ export default function PedidosAdminClient({ ordenes }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-300 pb-6">
+        <div><p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">Tienda</p><h1 className="mt-2 text-3xl font-bold text-gray-950">Pedidos</h1><p className="mt-1 text-sm text-gray-500">{ordenes.length} pedidos registrados</p></div>
         <button
           onClick={exportCSV}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors"
+          className="inline-flex min-h-11 items-center gap-2 border-b border-gray-500 px-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950"
         >
           <Download className="w-4 h-4" />
           Exportar CSV
         </button>
       </div>
 
-      <div className="flex gap-3 mb-4">
+      <div className="mb-5 mt-7 grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -80,13 +81,13 @@ export default function PedidosAdminClient({ ordenes }: Props) {
             placeholder="Buscar por orden, nombre o email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:border-[var(--verde-claro)] focus:outline-none"
+            className="w-full border-b border-gray-300 bg-transparent py-3 pl-10 pr-4 text-sm focus:border-[var(--verde-hoja)] focus:outline-none"
           />
         </div>
         <select
           value={filterEstado}
           onChange={(e) => setFilterEstado(e.target.value)}
-          className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:border-[var(--verde-claro)] focus:outline-none"
+          className="border-b border-gray-300 bg-transparent px-3 py-3 text-sm focus:border-[var(--verde-hoja)] focus:outline-none"
         >
           <option value="">Todos</option>
           <option value="pendiente">Pendiente</option>
@@ -94,7 +95,7 @@ export default function PedidosAdminClient({ ordenes }: Props) {
         </select>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="overflow-hidden border-t border-gray-300 bg-white">
         {filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-400">No se encontraron pedidos.</div>
         ) : (
@@ -125,9 +126,10 @@ export default function PedidosAdminClient({ ordenes }: Props) {
                   </td>
                   <td className="p-4 text-right font-bold">${Number(orden.total).toLocaleString("es-AR")}</td>
                   <td className="p-4 text-center">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      orden.estado === "procesado" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                    <span className={`inline-flex items-center gap-1.5 border-b px-1 py-1 text-xs font-semibold ${
+                      orden.estado === "procesado" ? "border-green-600 text-green-700" : "border-amber-500 text-amber-700"
                     }`}>
+                      <span className={`h-1.5 w-1.5 ${orden.estado === "procesado" ? "bg-green-600" : "bg-amber-500"}`} aria-hidden="true" />
                       {orden.estado}
                     </span>
                   </td>

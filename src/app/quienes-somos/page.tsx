@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Bullhorn, Eye, Globe, HandHeart, Leaf, Microscope, Scale, Target } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
+import CrossfadeImages from "@/components/CrossfadeImages";
 
 export const metadata: Metadata = {
   title: "Quiénes Somos",
@@ -8,12 +10,12 @@ export const metadata: Metadata = {
 };
 
 const valores = [
-  { icon: "🔬", title: "Evidencia", description: "Basamos cada acción en datos científicos verificables." },
-  { icon: "🌍", title: "Compromiso", description: "Trabajamos con convicción por el futuro de nuestra tierra." },
-  { icon: "🤲", title: "Comunidad", description: "Creemos en el poder de la acción colectiva y participativa." },
-  { icon: "📢", title: "Transparencia", description: "Rendimos cuentas de cada proyecto y cada recurso utilizado." },
-  { icon: "🌱", title: "Sustentabilidad", description: "Pensamos a largo plazo en cada decisión que tomamos." },
-  { icon: "⚖️", title: "Justicia socioambiental", description: "Entendemos que la crisis climática también es social, y promovemos soluciones inclusivas y equitativas." },
+  { Icon: Microscope, title: "Evidencia", description: "Basamos cada acción en datos científicos verificables." },
+  { Icon: Globe, title: "Compromiso", description: "Trabajamos con convicción por el futuro de nuestra tierra." },
+  { Icon: HandHeart, title: "Comunidad", description: "Creemos en el poder de la acción colectiva y participativa." },
+  { Icon: Bullhorn, title: "Transparencia", description: "Rendimos cuentas de cada proyecto y cada recurso utilizado." },
+  { Icon: Leaf, title: "Sustentabilidad", description: "Pensamos a largo plazo en cada decisión que tomamos." },
+  { Icon: Scale, title: "Justicia socioambiental", description: "Entendemos que la crisis climática también es social, y promovemos soluciones inclusivas y equitativas." },
 ];
 
 const consejo = [
@@ -21,6 +23,12 @@ const consejo = [
   { nombre: "Camila Núñez", rol: "Secretaria" },
   { nombre: "Deborah Iserre", rol: "Tesorera" },
   { nombre: "Nicolás Duarte", rol: "Fundador" },
+];
+
+const comunidadImages = [
+  { src: "/comunidad.png", alt: "Asamblea en defensa del Parque Caraguatá", position: "50% 50%" },
+  { src: "/comunidad2.png", alt: "Vecinos reunidos en asamblea por el Parque Caraguatá", position: "50% 50%" },
+  { src: "/comunidad3.png", alt: "Participación comunitaria en defensa del Parque Caraguatá", position: "50% 42%" },
 ];
 
 const hitos = [
@@ -36,173 +44,134 @@ const hitos = [
 
 export default function QuienesSomosPage() {
   return (
-    <>
-      {/* ─── HERO ─── */}
-      <section
-        className="relative pt-32 pb-20 overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #071f17 0%, #0B3D2E 40%, #1A5C3A 100%)" }}
-      >
-        <div aria-hidden className="absolute top-[20%] right-[20%] w-[400px] h-[400px] rounded-full bg-[var(--dorado)] opacity-[0.04] blur-[100px] pointer-events-none" />
-        <div aria-hidden className="absolute bottom-[10%] left-[10%] w-[300px] h-[300px] rounded-full bg-[var(--verde-menta)] opacity-[0.06] blur-[80px] pointer-events-none" />
-        <div className="section-container relative z-10 text-center max-w-3xl mx-auto">
+    <div className="pt-[4.75rem]">
+      <section className="dark-section">
+        <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
-            <span className="section-label justify-center !text-[var(--dorado-suave)]">Nuestra Historia</span>
-            <h1 className="!text-white mb-6">
-              Quiénes <span className="text-[var(--dorado)]">Somos</span>
-            </h1>
-            <p className="text-lg text-white/70 leading-relaxed mx-auto">
-              Somos una fundación correntina nacida de la urgencia climática y la
-              convicción de que la acción local tiene impacto global.
-            </p>
+            <div className="grid gap-9 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-end">
+              <div>
+                <span className="section-label !text-[var(--dorado-suave)]">Nuestra historia</span>
+                <h1 className="!text-white">Acción local para una crisis global.</h1>
+              </div>
+              <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">
+                Somos una fundación correntina nacida de la urgencia climática y de la convicción de que organizarse transforma el territorio.
+              </p>
+            </div>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* ─── MISSION & VISION ─── */}
       <section className="bg-white">
-        <div className="section-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <AnimatedSection>
-              <div className="glass-card p-8 sm:p-10 h-full border-t-4 border-t-[var(--verde-hoja)]">
-                <div className="w-14 h-14 rounded-2xl bg-[var(--verde-palido)] flex items-center justify-center text-2xl mb-6">🎯</div>
-                <h2 className="text-2xl mb-4">Misión</h2>
-                <p className="text-[var(--gris-calido)] leading-relaxed">
-                  Generar acción climática real en la provincia de Corrientes a través de la educación ambiental,
-                  la investigación científica y la incidencia en políticas públicas, fortaleciendo la resiliencia
-                  de las comunidades y los ecosistemas ante el cambio climático.
-                </p>
+        <div className="section-container grid gap-9 !py-16 lg:grid-cols-[minmax(0,1.12fr)_minmax(20rem,0.88fr)] lg:items-end sm:!py-20">
+          <AnimatedSection>
+            <CrossfadeImages
+              images={comunidadImages}
+              sizes="(max-width: 1024px) 100vw, 58vw"
+              quality={90}
+              intervalSeconds={5.5}
+              className="aspect-[4/3] bg-[var(--verde-palido)]"
+            />
+          </AnimatedSection>
+          <AnimatedSection delay={120}>
+            <div className="border-t border-[var(--border-strong)] pt-6">
+              <span className="section-label">Comunidad en acción</span>
+              <h2 className="text-3xl sm:text-4xl">Asamblea en defensa del Parque Caraguatá.</h2>
+              <div className="mt-5 space-y-4 text-base leading-relaxed text-[var(--gris-calido)] sm:text-lg">
+                <p>Casi 100 vecinos participaron de una asamblea histórica para defender el último pulmón verde de Resistencia.</p>
+                <p>Nos reunimos vecinos, activistas, investigadores y biólogos para expresar la preocupación por el desmonte que afectó parte del espacio destinado a ser Reserva Municipal, aprobada por ordenanza de manera unánime.</p>
+                <p>De manera conjunta se decidió presentar un petitorio ante la Municipalidad y seguir trabajando para que el Caraguatá sea una reserva natural para la comunidad.</p>
               </div>
-            </AnimatedSection>
-            <AnimatedSection delay={150}>
-              <div className="glass-card p-8 sm:p-10 h-full border-t-4 border-t-[var(--dorado)]">
-                <div className="w-14 h-14 rounded-2xl bg-[var(--dorado-claro)] flex items-center justify-center text-2xl mb-6">🔭</div>
-                <h2 className="text-2xl mb-4">Visión</h2>
-                <p className="text-[var(--gris-calido)] leading-relaxed">
-                  Ser la organización de referencia en acción climática en el Nordeste argentino, liderando la
-                  transición hacia un modelo de desarrollo sustentable que proteja los ecosistemas únicos de
-                  Corrientes y garantice un futuro digno para las próximas generaciones.
-                </p>
-              </div>
-            </AnimatedSection>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      <section className="bg-white">
+        <div className="section-container grid gap-0 !py-16 md:grid-cols-2 sm:!py-20">
+          <AnimatedSection>
+            <article className="border-y border-[var(--border-strong)] py-8 md:pr-10">
+              <Target size={28} className="text-[var(--verde-hoja)]" />
+              <h2 className="mt-6 text-3xl">Misión</h2>
+              <p className="mt-4 leading-relaxed text-[var(--gris-calido)]">
+                Generar acción climática real en Corrientes mediante educación ambiental, investigación científica e incidencia en políticas públicas, fortaleciendo la resiliencia de comunidades y ecosistemas.
+              </p>
+            </article>
+          </AnimatedSection>
+          <AnimatedSection delay={120}>
+            <article className="border-b border-[var(--border-strong)] py-8 md:border-l md:border-t md:pl-10">
+              <Eye size={28} className="text-[var(--dorado)]" />
+              <h2 className="mt-6 text-3xl">Visión</h2>
+              <p className="mt-4 leading-relaxed text-[var(--gris-calido)]">
+                Ser una referencia en acción climática en el Nordeste argentino y acompañar una transición que proteja los ecosistemas únicos de Corrientes y el futuro de sus comunidades.
+              </p>
+            </article>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      <section className="paper-section border-y border-[var(--border)]">
+        <div className="section-container !py-16 sm:!py-20">
+          <AnimatedSection>
+            <div className="grid gap-6 border-b border-[var(--border-strong)] pb-8 lg:grid-cols-2 lg:items-end">
+              <div><span className="section-label">Lo que nos guía</span><h2 className="section-title">Valores puestos en práctica.</h2></div>
+              <p className="text-[var(--gris-calido)]">Principios para decidir cómo trabajamos, con quiénes nos aliamos y de qué manera rendimos cuentas.</p>
+            </div>
+          </AnimatedSection>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3">
+            {valores.map((valor, i) => {
+              const Icon = valor.Icon;
+              return <AnimatedSection key={valor.title} delay={i * 60}>
+                <article className={`grid min-h-44 grid-cols-[2rem_minmax(0,1fr)] gap-4 border-b border-[var(--border)] py-7 sm:px-6 ${i % 3 !== 0 ? "lg:border-l" : ""}`}>
+                  <Icon size={23} className="text-[var(--verde-hoja)]" />
+                  <div><h3 className="text-lg">{valor.title}</h3><p className="mt-2 text-sm leading-relaxed text-[var(--gris-calido)]">{valor.description}</p></div>
+                </article>
+              </AnimatedSection>;
+            })}
           </div>
         </div>
       </section>
 
-      {/* ─── VALUES ─── */}
-      <section className="bg-[var(--crema)]">
-        <div className="section-container">
+      <section className="bg-white">
+        <div className="section-container !py-16 sm:!py-20">
           <AnimatedSection>
-            <div className="text-center mb-14">
-              <span className="section-label justify-center">Lo que nos guía</span>
-              <h2>Nuestros Valores</h2>
-            </div>
-          </AnimatedSection>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {valores.map((valor, i) => (
-              <AnimatedSection key={valor.title} delay={i * 70}>
-                <div className="glass-card p-6 h-full flex gap-4 items-start">
-                  <span className="text-2xl mt-0.5 flex-shrink-0">{valor.icon}</span>
-                  <div>
-                    <h3 className="text-base mb-1">{valor.title}</h3>
-                    <p className="text-sm text-[var(--gris-calido)] leading-relaxed">{valor.description}</p>
+            <div className="grid gap-8 lg:grid-cols-[minmax(16rem,0.7fr)_minmax(0,1.3fr)]">
+              <div><span className="section-label">Las personas</span><h2 className="section-title">Una organización, muchas formas de participar.</h2></div>
+              <div>
+                <div className="border-y border-[var(--border-strong)] py-7">
+                  <h3 className="text-2xl">Consejo de Administración</h3>
+                  <p className="mt-2 text-sm text-[var(--gris-calido)]">Conducción institucional y decisiones estratégicas de la fundación.</p>
+                  <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
+                    {consejo.map((miembro) => <div key={miembro.nombre}><h4 className="font-semibold text-[var(--verde-profundo)]">{miembro.nombre}</h4><p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[var(--verde-hoja)]">{miembro.rol}</p></div>)}
                   </div>
                 </div>
-              </AnimatedSection>
-            ))}
-          </div>
+                <div className="grid gap-7 border-b border-[var(--border)] py-7 sm:grid-cols-2">
+                  <div><h3 className="text-xl">Equipo de Coordinación</h3><p className="mt-3 text-sm leading-relaxed text-[var(--gris-calido)]">Lidera, organiza y acompaña los proyectos para asegurar su desarrollo e impacto.</p></div>
+                  <div><h3 className="text-xl">Voluntariado</h3><p className="mt-3 text-sm leading-relaxed text-[var(--gris-calido)]">Más de 90 personas aportan tiempo y energía en distintos puntos del NEA.</p></div>
+                </div>
+              </div>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
-      {/* ─── TEAM ─── */}
-      <section className="bg-white">
-        <div className="section-container">
+      <section className="warm-section border-t border-[var(--dorado)]/25">
+        <div className="section-container !py-16 sm:!py-20">
           <AnimatedSection>
-            <div className="text-center mb-14">
-              <span className="section-label justify-center">Las personas detrás</span>
-              <h2>Nuestro Equipo</h2>
-            </div>
+            <div className="mb-12 max-w-3xl"><span className="section-label">Nuestro camino</span><h2 className="section-title">Hitos que explican quiénes somos.</h2></div>
           </AnimatedSection>
-
-          {/* Consejo de Administración */}
-          <div className="mb-16">
-            <AnimatedSection>
-              <h3 className="text-xl text-center mb-4">Consejo de Administración</h3>
-              <p className="text-[var(--gris-calido)] text-center max-w-2xl mx-auto mb-8 text-sm">
-                El órgano responsable de la conducción institucional y la toma de decisiones estratégicas de la fundación.
-              </p>
-            </AnimatedSection>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-              {consejo.map((miembro, i) => (
-                <AnimatedSection key={miembro.nombre} delay={i * 80}>
-                  <div className="text-center">
-                    <h4 className="text-lg font-semibold text-[var(--verde-profundo)] mb-1">{miembro.nombre}</h4>
-                    <p className="text-sm font-medium text-[var(--dorado)]">{miembro.rol}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-
-          {/* Equipo de Coordinación */}
-          <div className="mb-16">
-            <AnimatedSection delay={200}>
-              <h3 className="text-xl text-center mb-4">Equipo de Coordinación</h3>
-              <p className="text-[var(--gris-calido)] text-center max-w-2xl mx-auto text-sm">
-                Integrado por miembros comprometidos que lideran, organizan y dan seguimiento a los distintos proyectos de la fundación, asegurando su desarrollo e impacto en el territorio.
-              </p>
-            </AnimatedSection>
-          </div>
-
-          {/* Voluntariado */}
-          <div>
-            <AnimatedSection delay={300}>
-              <h3 className="text-xl text-center mb-4">Voluntariado</h3>
-              <p className="text-[var(--gris-calido)] text-center max-w-2xl mx-auto text-sm">
-                Una red de más de 90 voluntarios en toda la región del NEA que, con compromiso y vocación colectiva, aportan su tiempo y energía para construir un futuro más sostenible.
-              </p>
-            </AnimatedSection>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── TIMELINE ─── */}
-      <section
-        className="relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, var(--verde-profundo) 0%, var(--verde-selva) 100%)" }}
-      >
-        <div aria-hidden className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[var(--dorado)] opacity-[0.05] blur-3xl pointer-events-none" />
-        <div className="section-container relative z-10">
-          <AnimatedSection>
-            <div className="text-center mb-14">
-              <span className="section-label justify-center !text-[var(--dorado-suave)]">Nuestro Camino</span>
-              <h2 className="!text-white">Hitos Importantes</h2>
-            </div>
-          </AnimatedSection>
-
-          <div className="max-w-2xl mx-auto">
+          <div className="mx-auto max-w-4xl border-t border-[var(--verde-profundo)]">
             {hitos.map((hito, i) => (
-              <AnimatedSection key={hito.year} delay={i * 130}>
-                <div className="flex gap-0 items-stretch">
-                  {/* Left: year badge + connector line */}
-                  <div className="flex flex-col items-center mr-6 flex-shrink-0">
-                    <div className="w-16 h-16 rounded-2xl bg-[var(--dorado)] flex items-center justify-center font-bold text-[var(--verde-profundo)] shadow-lg text-sm flex-shrink-0 z-10">
-                      {hito.year}
-                    </div>
-                    {i < hitos.length - 1 && (
-                      <div className="w-0.5 flex-1 my-2 bg-gradient-to-b from-[var(--dorado)]/60 to-white/10 min-h-[2rem]" />
-                    )}
-                  </div>
-                  {/* Right: content */}
-                  <div className={`pb-${i < hitos.length - 1 ? "10" : "0"} pt-3 flex-1`}>
-                    <h3 className="!text-white text-lg mb-1">{hito.title}</h3>
-                    <p className="text-white/70 leading-relaxed text-sm">{hito.text}</p>
-                  </div>
-                </div>
+              <AnimatedSection key={`${hito.year}-${hito.title}`} delay={Math.min(i * 70, 280)}>
+                <article className="grid gap-3 border-b border-[var(--border-strong)] py-7 sm:grid-cols-[5rem_minmax(12rem,0.6fr)_minmax(0,1.4fr)] sm:gap-7">
+                  <p className="font-extrabold text-[var(--verde-hoja)]">{hito.year}</p>
+                  <h3 className="!text-xl">{hito.title}</h3>
+                  <p className="text-sm leading-relaxed text-[var(--gris-calido)]">{hito.text}</p>
+                </article>
               </AnimatedSection>
             ))}
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

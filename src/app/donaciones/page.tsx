@@ -1,10 +1,12 @@
-﻿import DonacionesClient from "./DonacionesClient";
+import DonacionesClient from "./DonacionesClient";
+import { getPublicConfiguration } from "@/lib/configuracion";
 
 export const metadata = {
   title: "Donaciones",
-  description: "Apoyá la causa ambiental en Corrientes con tu donación.",
+  description: "Conocé cómo apoyar la acción climática de la Fundación Correntinos.",
 };
 
-export default function DonacionesPage() {
-  return <DonacionesClient />;
+export default async function DonacionesPage() {
+  const configuration = await getPublicConfiguration();
+  return <DonacionesClient email={configuration.email} phone={configuration.phone} />;
 }

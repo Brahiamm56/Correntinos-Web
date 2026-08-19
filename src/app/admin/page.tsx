@@ -1,125 +1,127 @@
-import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Package, Newspaper, DollarSign, Clock } from "lucide-react";
+import { Clock, DollarSign, Newspaper, Package } from "lucide-react";
+import { count, desc, eq, sum } from "drizzle-orm";
+import { db } from "@/db";
+import { noticias, ordenes } from "@/db/schema";
+
+export const dynamic = "force-dynamic";
+
+async function loadDashboard() {
+  try {
+    const [ordersCount, pendingCount, newsCount, amountResult, pendingRows, latestOrders, latestNews] =
+      await Promise.all([
+        db.select({ value: count() }).from(ordenes),
+        db.select({ value: count() }).from(ordenes).where(eq(ordenes.estado, "pendiente")),
+        db.select({ value: count() }).from(noticias),
+        db.select({ value: sum(ordenes.total) }).from(ordenes),
+        db.select().from(ordenes).where(eq(ordenes.estado, "pendiente")).orderBy(desc(ordenes.creado_en)).limit(5),
+        db.select().from(ordenes).orderBy(desc(ordenes.creado_en)).limit(5),
+        db.select().from(noticias).orderBy(desc(noticias.fecha_creacion)).limit(5),
+      ]);
+
+    return {
+      data: {
+        totalOrders: ordersCount[0]?.value ?? 0,
+        pendingOrders: pendingCount[0]?.value ?? 0,
+        totalNews: newsCount[0]?.value ?? 0,
+        totalAmount: Number(amountResult[0]?.value ?? 0),
+        pendingRows,
+        latestOrders,
+        latestNews,
+      },
+      error: null,
+    };
+  } catch (error) {
+    console.error("Error en AdminDashboard:", error);
+    return { data: null, error: "No pudimos cargar la información operativa." };
+  }
+}
+
+function Status({ active, children }: { active: boolean; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center gap-2 text-xs font-semibold ${active ? "text-emerald-700" : "text-amber-700"}`}>
+      <span className={`h-2 w-2 ${active ? "bg-emerald-600" : "bg-amber-500"}`} aria-hidden="true" />
+      {children}
+    </span>
+  );
+}
 
 export default async function AdminDashboard() {
-  const supabase = await createClient();
+  const result = await loadDashboard();
 
-  const [
-    { count: totalOrdenes },
-    { data: ultimasOrdenes },
-    { data: ultimasNoticias },
-    { data: ventasData },
-  ] = await Promise.all([
-    supabase.from("ordenes").select("*", { count: "exact", head: true }),
-    supabase.from("ordenes").select("*").order("creado_en", { ascending: false }).limit(5),
-    supabase.from("noticias").select("*").order("fecha_creacion", { ascending: false }).limit(5),
-    supabase.from("ordenes").select("total"),
-  ]);
+  if (!result.data) {
+    return (
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">Administración</p>
+        <h1 className="mt-2 text-3xl font-bold text-gray-950">Resumen</h1>
+        <p role="alert" className="mt-8 border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {result.error}
+        </p>
+      </div>
+    );
+  }
 
-  const totalVentas = ventasData?.reduce((sum, o) => sum + Number(o.total), 0) || 0;
-  const pendientes = ultimasOrdenes?.filter((o) => o.estado === "pendiente").length || 0;
+  const { totalOrders, pendingOrders, totalNews, totalAmount, pendingRows, latestOrders, latestNews } = result.data;
+  const metrics = [
+    { label: "Monto de pedidos", value: `$${totalAmount.toLocaleString("es-AR")}`, icon: DollarSign },
+    { label: "Pedidos registrados", value: totalOrders, icon: Package },
+    { label: "Pendientes", value: pendingOrders, icon: Clock },
+    { label: "Noticias", value: totalNews, icon: Newspaper },
+  ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <header className="flex flex-col gap-5 border-b border-gray-300 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div><p className="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">Administración</p><h1 className="mt-2 text-3xl font-bold text-gray-950">Resumen operativo</h1></div>
+        <div><p className="max-w-md text-sm text-gray-500">Una vista rápida del contenido, los pedidos y las tareas que necesitan atención.</p><nav aria-label="Accesos rápidos" className="mt-3 flex flex-wrap gap-4 text-sm font-semibold"><Link href="/admin/noticias" className="text-[var(--verde-hoja)] hover:underline">Gestionar noticias</Link><Link href="/admin/productos" className="text-[var(--verde-hoja)] hover:underline">Gestionar productos</Link><Link href="/admin/pedidos" className="text-[var(--verde-hoja)] hover:underline">Ver pedidos</Link></nav></div>
+      </header>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: "Total Ventas", value: `$${totalVentas.toLocaleString("es-AR")}`, icon: DollarSign, color: "bg-green-100 text-green-700" },
-          { label: "Órdenes", value: totalOrdenes || 0, icon: Package, color: "bg-blue-100 text-blue-700" },
-          { label: "Pendientes", value: pendientes, icon: Clock, color: "bg-yellow-100 text-yellow-700" },
-          { label: "Noticias", value: ultimasNoticias?.length || 0, icon: Newspaper, color: "bg-purple-100 text-purple-700" },
-        ].map((stat) => {
-          const Icon = stat.icon;
+      <section aria-label="Indicadores" className="mt-8 grid sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric, index) => {
+          const Icon = metric.icon;
           return (
-            <div key={stat.label} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stat.color}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  <p className="text-xs text-gray-500">{stat.label}</p>
-                </div>
-              </div>
+            <div key={metric.label} className={`border-b border-gray-200 py-6 sm:px-6 ${index > 0 ? "sm:border-l" : ""}`}>
+              <Icon className="h-5 w-5 text-[var(--verde-hoja)]" />
+              <p className="mt-6 text-2xl font-bold text-gray-950">{metric.value}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.06em] text-gray-500">{metric.label}</p>
             </div>
           );
         })}
-      </div>
+      </section>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Últimas órdenes */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-gray-900">Últimas Órdenes</h2>
-            <Link href="/admin/pedidos" className="text-sm text-[var(--verde-hoja)] font-medium hover:underline">
-              Ver todas →
-            </Link>
-          </div>
-          {!ultimasOrdenes || ultimasOrdenes.length === 0 ? (
-            <p className="text-gray-400 text-sm">Sin órdenes aún</p>
-          ) : (
-            <div className="space-y-3">
-              {ultimasOrdenes.map((orden) => (
-                <Link
-                  key={orden.id}
-                  href={`/admin/pedidos/${orden.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{orden.numero_orden}</p>
-                    <p className="text-xs text-gray-400">{orden.cliente_nombre}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold">${Number(orden.total).toLocaleString("es-AR")}</p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      orden.estado === "procesado" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-                    }`}>
-                      {orden.estado}
-                    </span>
-                  </div>
+      <section className="mt-10">
+        <div className="flex items-end justify-between border-b border-amber-300 pb-4"><div><p className="text-xs font-bold uppercase tracking-[0.1em] text-amber-700">Requiere atención</p><h2 className="mt-1 font-sans text-lg font-bold text-gray-950">Pedidos pendientes</h2></div><Link href="/admin/pedidos" className="text-sm font-semibold text-[var(--verde-hoja)] hover:underline">Abrir bandeja</Link></div>
+        {pendingRows.length === 0 ? <p className="border-b border-gray-200 py-6 text-sm text-gray-500">No hay pedidos pendientes.</p> : <div>{pendingRows.map((order) => <Link key={order.id} href={`/admin/pedidos/${order.id}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-gray-200 py-4 transition-colors hover:bg-white"><div><p className="text-sm font-semibold text-gray-900">{order.numero_orden || "Sin número"}</p><p className="mt-1 text-xs text-gray-500">{order.cliente_nombre}</p></div><div className="text-right"><p className="text-sm font-bold text-gray-900">${Number(order.total).toLocaleString("es-AR")}</p><p className="mt-1 text-xs text-gray-500">{order.creado_en ? new Date(order.creado_en).toLocaleDateString("es-AR") : "Sin fecha"}</p></div></Link>)}</div>}
+      </section>
+
+      <div className="mt-10 grid gap-10 xl:grid-cols-2">
+        <section>
+          <div className="flex items-center justify-between border-b border-gray-300 pb-4"><h2 className="font-sans text-lg font-bold text-gray-950">Últimos pedidos</h2><Link href="/admin/pedidos" className="text-sm font-semibold text-[var(--verde-hoja)] hover:underline">Ver todos</Link></div>
+          {latestOrders.length === 0 ? <p className="border-b border-gray-200 py-7 text-sm text-gray-500">Todavía no hay pedidos.</p> : (
+            <div>
+              {latestOrders.map((order) => (
+                <Link key={order.id} href={`/admin/pedidos/${order.id}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-gray-200 py-4 transition-colors hover:bg-white">
+                  <div><p className="text-sm font-semibold text-gray-900">{order.numero_orden || "Sin número"}</p><p className="mt-1 text-xs text-gray-500">{order.cliente_nombre}</p></div>
+                  <div className="text-right"><p className="text-sm font-bold text-gray-900">${Number(order.total).toLocaleString("es-AR")}</p><Status active={order.estado === "procesado"}>{order.estado || "pendiente"}</Status></div>
                 </Link>
               ))}
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Últimas noticias */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-gray-900">Últimas Noticias</h2>
-            <Link href="/admin/noticias" className="text-sm text-[var(--verde-hoja)] font-medium hover:underline">
-              Ver todas →
-            </Link>
-          </div>
-          {!ultimasNoticias || ultimasNoticias.length === 0 ? (
-            <p className="text-gray-400 text-sm">Sin noticias aún</p>
-          ) : (
-            <div className="space-y-3">
-              {ultimasNoticias.map((noticia) => (
-                <Link
-                  key={noticia.id}
-                  href={`/admin/noticias/${noticia.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div>
-                    <p className="text-sm font-medium line-clamp-1">{noticia.titulo}</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(noticia.fecha_creacion).toLocaleDateString("es-AR")}
-                    </p>
-                  </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    noticia.publicada ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                  }`}>
-                    {noticia.publicada ? "Publicada" : "Borrador"}
-                  </span>
+        <section>
+          <div className="flex items-center justify-between border-b border-gray-300 pb-4"><h2 className="font-sans text-lg font-bold text-gray-950">Últimas noticias</h2><Link href="/admin/noticias" className="text-sm font-semibold text-[var(--verde-hoja)] hover:underline">Ver todas</Link></div>
+          {latestNews.length === 0 ? <p className="border-b border-gray-200 py-7 text-sm text-gray-500">Todavía no hay noticias.</p> : (
+            <div>
+              {latestNews.map((article) => (
+                <Link key={article.id} href="/admin/noticias" className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-gray-200 py-4 transition-colors hover:bg-white">
+                  <div><p className="line-clamp-1 text-sm font-semibold text-gray-900">{article.titulo}</p><p className="mt-1 text-xs text-gray-500">{article.fecha_creacion ? new Date(article.fecha_creacion).toLocaleDateString("es-AR") : "Sin fecha"}</p></div>
+                  <Status active={Boolean(article.publicada)}>{article.publicada ? "Publicada" : "Borrador"}</Status>
                 </Link>
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

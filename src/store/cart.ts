@@ -12,6 +12,7 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  hydrate: () => void;
   addItem: (item: Omit<CartItem, "cantidad">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, cantidad: number) => void;
@@ -37,7 +38,9 @@ function saveCart(items: CartItem[]) {
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
-  items: loadCart(),
+  items: [],
+
+  hydrate: () => set({ items: loadCart() }),
 
   addItem: (item) => {
     set((state) => {

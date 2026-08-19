@@ -5,12 +5,11 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2560, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 31536000,
-    qualities: [25, 50, 75, 80, 95],
+    qualities: [25, 50, 70, 75, 78, 80, 82, 88, 90, 95],
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "csbreqyjrgvafvzlxsqm.supabase.co",
-        pathname: "/storage/v1/object/public/**",
+        hostname: "res.cloudinary.com",
       },
       {
         protocol: "https",

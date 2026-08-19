@@ -3,23 +3,23 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle } from "reicon-react";
 
 function ExitoContent() {
   const searchParams = useSearchParams();
   const orden = searchParams.get("orden");
 
   return (
-    <div className="min-h-screen bg-[var(--crema)] pt-28 pb-20">
-      <div className="max-w-lg mx-auto px-[var(--section-padding-x)] text-center">
-        <div className="glass-card p-10">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
-          <h1 className="text-2xl mb-3">¡Compra confirmada!</h1>
+    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+      <div className="mx-auto max-w-lg px-[var(--section-padding-x)]">
+        <div className="border-y border-[var(--border-strong)] py-10">
+          <CheckCircle className="mb-6 h-14 w-14 text-[var(--verde-hoja)]" />
+          <h1 className="text-2xl mb-3">Pedido registrado</h1>
           <p className="text-[var(--gris-calido)] mb-6">
-            Tu pedido fue registrado exitosamente. Recibirás un email con los detalles.
+            Guardamos tu pedido. Conservá el número de orden para consultar su estado.
           </p>
           {orden && (
-            <div className="bg-[var(--verde-palido)] rounded-xl p-4 mb-8 border border-[var(--border)]">
+            <div className="mb-8 border-y border-[var(--border)] py-4">
               <p className="text-xs text-[var(--gris-calido)] mb-1">Número de orden</p>
               <p className="font-bold text-lg text-[var(--verde-profundo)]">{orden}</p>
             </div>

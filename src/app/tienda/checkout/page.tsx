@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart";
 import { useAuthStore } from "@/store/auth";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShoppingBag } from "reicon-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -23,13 +23,15 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (profile) {
+    if (!profile) return;
+    const frame = window.requestAnimationFrame(() => {
       setFormData((prev) => ({
         ...prev,
         cliente_nombre: prev.cliente_nombre || profile.nombre || "",
         cliente_email: prev.cliente_email || profile.email || "",
       }));
-    }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [profile]);
 
   useEffect(() => {
@@ -40,10 +42,10 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[var(--crema)] pt-28 pb-20">
-        <div className="max-w-lg mx-auto px-[var(--section-padding-x)] text-center">
-          <div className="glass-card p-12">
-            <div className="text-5xl mb-4">🛒</div>
+      <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+        <div className="mx-auto max-w-lg px-[var(--section-padding-x)]">
+          <div className="border-y border-[var(--border-strong)] py-12">
+            <ShoppingBag size={42} className="mb-4 text-[var(--verde-hoja)]" />
             <h1 className="text-2xl mb-4">Carrito vacío</h1>
             <p className="text-[var(--gris-calido)] mb-6">Agregá productos antes de continuar.</p>
             <Link href="/tienda" className="btn-primary">Ir a la tienda</Link>
@@ -96,7 +98,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--crema)] pt-28 pb-20">
+    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
       <div className="max-w-4xl mx-auto px-[var(--section-padding-x)]">
         <Link href="/tienda/carrito" className="inline-flex items-center gap-2 text-sm text-[var(--gris-calido)] hover:text-[var(--verde-profundo)] transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />
@@ -107,7 +109,7 @@ export default function CheckoutPage() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
-            <div className="glass-card p-6">
+            <div className="border-y border-[var(--border-strong)] py-6">
               <h2 className="!text-lg font-bold mb-4">Datos de envío</h2>
               <div className="space-y-4">
                 <div>
@@ -121,7 +123,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.cliente_nombre}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                    className="field"
                   />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -136,7 +138,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.cliente_email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                      className="field"
                     />
                   </div>
                   <div>
@@ -150,7 +152,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.cliente_telefono}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                      className="field"
                       placeholder="+54 379..."
                     />
                   </div>
@@ -166,7 +168,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.cliente_direccion}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                    className="field"
                     placeholder="Calle, número, piso/depto"
                   />
                 </div>
@@ -181,7 +183,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.cliente_ciudad}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-white focus:border-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+                    className="field"
                     placeholder="Corrientes"
                   />
                 </div>
@@ -189,7 +191,7 @@ export default function CheckoutPage() {
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 px-4 py-3 rounded-xl">{error}</p>
+              <p role="alert" className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
             )}
 
             <button
@@ -197,13 +199,12 @@ export default function CheckoutPage() {
               disabled={loading}
               className="btn-primary w-full justify-center text-base py-4 disabled:opacity-50"
             >
-              {loading ? "Procesando..." : `Confirmar compra — $${getTotal().toLocaleString("es-AR")}`}
+              {loading ? "Registrando pedido..." : `Confirmar pedido — $${getTotal().toLocaleString("es-AR")}`}
             </button>
           </form>
 
-          {/* Order summary */}
           <div>
-            <div className="glass-card p-6 sticky top-28">
+            <div className="sticky top-28 border-y border-[var(--border-strong)] py-6">
               <h3 className="!text-lg font-bold mb-4">Tu pedido</h3>
               <div className="space-y-3 mb-4">
                 {items.map((item) => (

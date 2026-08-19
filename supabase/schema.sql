@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS productos (
   descripcion TEXT,
   precio DECIMAL(10, 2) NOT NULL CHECK (precio >= 0),
   stock INTEGER DEFAULT 0 CHECK (stock >= 0),
+  variantes JSONB DEFAULT '[]'::JSONB,
   imagen_url VARCHAR(500),
   categoria_id UUID REFERENCES categorias(id) ON DELETE SET NULL,
   activo BOOLEAN DEFAULT TRUE,
@@ -77,6 +78,9 @@ CREATE TABLE IF NOT EXISTS configuracion (
 
 ALTER TABLE configuracion
   ADD COLUMN IF NOT EXISTS singleton_key BOOLEAN NOT NULL DEFAULT TRUE;
+
+ALTER TABLE productos
+  ADD COLUMN IF NOT EXISTS variantes JSONB DEFAULT '[]'::JSONB;
 
 -- ─── Índices ───
 CREATE INDEX IF NOT EXISTS idx_noticias_publicada ON noticias(publicada);

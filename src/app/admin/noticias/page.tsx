@@ -13,6 +13,7 @@ import {
 import Drawer from "@/components/admin/Drawer";
 import RichEditor from "@/components/admin/RichEditor";
 import ImageUpload from "@/components/admin/ImageUpload";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import type { Noticia } from "@/types/database";
 
 interface DrawerState {
@@ -36,6 +37,8 @@ export default function AdminNoticiasPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Noticia | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   async function refreshNoticias() {
     const { data, error } = await getNoticias();
@@ -138,14 +141,18 @@ export default function AdminNoticiasPage() {
     await refreshNoticias();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("¿Eliminar esta noticia? Esta acción no se puede deshacer.")) return;
-    const result = await deleteNoticia(id);
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const result = await deleteNoticia(deleteTarget.id);
     if (result.error) {
       setSaveError(result.error);
+      setDeleting(false);
       return;
     }
-    setNoticias((prev) => prev.filter((n) => n.id !== id));
+    setNoticias((prev) => prev.filter((n) => n.id !== deleteTarget.id));
+    setDeleting(false);
+    setDeleteTarget(null);
   }
 
   const filtered = noticias.filter((n) =>
@@ -155,14 +162,15 @@ export default function AdminNoticiasPage() {
   return (
     <>
       <div>
-        <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-300 pb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Noticias</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">Contenido</p>
+            <h1 className="mt-2 text-3xl font-bold text-gray-950">Noticias</h1>
             <p className="text-sm text-gray-400 mt-0.5">{noticias.length} artículos en total</p>
           </div>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--verde-profundo)] text-white text-sm font-medium hover:bg-[var(--verde-selva)] transition-colors"
+            className="inline-flex min-h-11 items-center gap-2 bg-[var(--verde-profundo)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--verde-selva)]"
           >
             <Plus className="w-4 h-4" />
             Nueva Noticia
@@ -176,11 +184,11 @@ export default function AdminNoticiasPage() {
             placeholder="Buscar por título..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:border-[var(--verde-claro)] focus:outline-none bg-white"
+          className="w-full border-b border-gray-300 bg-transparent py-3 pl-10 pr-4 text-sm focus:border-[var(--verde-hoja)] focus:outline-none"
           />
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="border-t border-gray-300 bg-white">
           {loading ? (
             <div className="p-12 text-center">
               <div className="w-8 h-8 border-2 border-[var(--verde-hoja)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
@@ -207,11 +215,11 @@ export default function AdminNoticiasPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         {noticia.imagen_url ? (
-                          <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 relative">
+                          <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden bg-gray-100">
                             <Image src={noticia.imagen_url} alt={noticia.titulo} fill className="object-cover" unoptimized />
                           </div>
                         ) : (
-                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center bg-gray-100">
                             <Newspaper className="w-5 h-5 text-gray-300" />
                           </div>
                         )}
@@ -224,8 +232,8 @@ export default function AdminNoticiasPage() {
                     <td className="p-4">
                       <button
                         onClick={() => togglePublicada(noticia.id, noticia.publicada)}
-                        className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full transition-colors ${
-                          noticia.publicada ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        className={`inline-flex items-center gap-1.5 border-b px-1 py-1 text-xs font-semibold transition-colors ${
+                          noticia.publicada ? "border-green-600 text-green-700" : "border-gray-400 text-gray-500"
                         }`}
                       >
                         {noticia.publicada ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -234,10 +242,10 @@ export default function AdminNoticiasPage() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(noticia)} title="Editar" className="p-2 rounded-lg hover:bg-blue-50 text-blue-400 hover:text-blue-600 transition-colors">
+                        <button onClick={() => openEdit(noticia)} aria-label={`Editar ${noticia.titulo}`} title="Editar" className="p-2 text-blue-500 transition-colors hover:bg-blue-50 hover:text-blue-700">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(noticia.id)} title="Eliminar" className="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors">
+                        <button onClick={() => setDeleteTarget(noticia)} aria-label={`Eliminar ${noticia.titulo}`} title="Eliminar" className="p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-700">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -277,7 +285,7 @@ export default function AdminNoticiasPage() {
               required
               value={form.titulo}
               onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[var(--verde-claro)] focus:ring-1 focus:ring-[var(--verde-claro)] focus:outline-none transition-colors text-sm"
+            className="w-full border border-gray-300 px-4 py-3 text-sm transition-colors focus:border-[var(--verde-hoja)] focus:outline-none"
               placeholder="Título de la noticia"
             />
           </div>
@@ -309,27 +317,35 @@ export default function AdminNoticiasPage() {
           </label>
 
           {saveError && (
-            <p className="text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">{saveError}</p>
+            <p role="alert" className="border-l-2 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{saveError}</p>
           )}
 
           <div className="flex gap-3 pt-2 pb-4">
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-3 rounded-lg bg-[var(--verde-profundo)] text-white font-medium hover:bg-[var(--verde-selva)] transition-colors disabled:opacity-50 text-sm"
+              className="flex-1 bg-[var(--verde-profundo)] py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--verde-selva)] disabled:opacity-50"
             >
               {saving ? "Guardando..." : drawer.mode === "create" ? "Crear Noticia" : "Guardar Cambios"}
             </button>
             <button
               type="button"
               onClick={closeDrawer}
-              className="px-5 py-3 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium"
+              className="border-b border-gray-400 px-5 py-3 text-sm font-medium text-gray-600 transition-colors hover:text-gray-950"
             >
               Cancelar
             </button>
           </div>
         </form>
       </Drawer>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Eliminar noticia"
+        description={`Vas a eliminar “${deleteTarget?.titulo ?? "esta noticia"}”. Esta acción no se puede deshacer.`}
+        busy={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+      />
     </>
   );
 }

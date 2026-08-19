@@ -2,13 +2,11 @@
 
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
 import { Upload, X, Loader2, ImageIcon } from "lucide-react";
 
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
-  bucket?: string;
   folder?: string;
   aspectRatio?: string;
 }
@@ -18,8 +16,6 @@ const MAX_SIZE_MB = 10;
 export default function ImageUpload({
   value,
   onChange,
-  bucket = "media",
-  folder = "uploads",
   aspectRatio = "16/9",
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
@@ -43,35 +39,29 @@ export default function ImageUpload({
       setUploading(true);
 
       try {
-        const supabase = createClient();
-        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-        const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const formData = new FormData();
+        formData.append("file", file);
 
-        const { error: uploadError } = await supabase.storage
-          .from(bucket)
-          .upload(filename, file, {
-            contentType: file.type,
-            cacheControl: "31536000",
-          });
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
 
-        if (uploadError) {
-          setError(
-            uploadError.message.includes("Bucket not found")
-              ? `El bucket "${bucket}" no existe. Crealo en Supabase → Storage.`
-              : uploadError.message
-          );
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error || "Error al subir la imagen a Cloudinary");
           return;
         }
 
-        const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
-        onChange(data.publicUrl);
+        onChange(data.url);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al subir la imagen");
       } finally {
         setUploading(false);
       }
     },
-    [bucket, folder, onChange]
+    [onChange]
   );
 
   const handleDrop = useCallback(
@@ -84,25 +74,16 @@ export default function ImageUpload({
     [handleFile]
   );
 
-  const handleRemove = useCallback(async () => {
-    if (!value) return;
-    // Optionally delete from storage
-    try {
-      const supabase = createClient();
-      const url = new URL(value);
-      const pathParts = url.pathname.split(`/object/public/${bucket}/`);
-      if (pathParts[1]) {
-        await supabase.storage.from(bucket).remove([pathParts[1]]);
-      }
-    } catch {
-      // Ignore delete errors (external URL or already removed)
-    }
+  const handleRemove = useCallback(() => {
     onChange("");
-  }, [value, bucket, onChange]);
+  }, [onChange]);
 
   if (value) {
     return (
-      <div className="relative rounded-lg overflow-hidden bg-gray-100 border border-gray-200" style={{ aspectRatio }}>
+      <div
+        className="relative rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
+        style={{ aspectRatio }}
+      >
         <Image
           src={value}
           alt="Preview"
@@ -118,7 +99,7 @@ export default function ImageUpload({
         >
           <X className="w-4 h-4" />
         </button>
-        <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/50 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-3 py-2">
           <p className="text-white text-xs truncate opacity-75">
             {value.split("/").pop()}
           </p>
@@ -138,14 +119,17 @@ export default function ImageUpload({
             : "border-gray-200 hover:border-[var(--verde-hoja)] hover:bg-green-50"
         }`}
         style={{ aspectRatio, minHeight: 140 }}
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
       >
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="w-8 h-8 text-[var(--verde-hoja)] animate-spin" />
-            <span className="text-sm text-gray-500">Subiendo imagen...</span>
+            <span className="text-sm text-gray-500">Subiendo imagen a Cloudinary...</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 p-4 text-center">
@@ -174,7 +158,9 @@ export default function ImageUpload({
         />
       </label>
       {error && (
-        <p className="mt-1.5 text-xs text-red-600 bg-red-50 px-3 py-1.5 rounded-lg">{error}</p>
+        <p className="mt-1.5 text-xs text-red-600 bg-red-50 px-3 py-1.5 rounded-lg">
+          {error}
+        </p>
       )}
     </div>
   );

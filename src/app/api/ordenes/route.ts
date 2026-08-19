@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  AuthorizationError,
-  createServiceClient,
-  getAuthenticatedUser,
-} from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { db } from "@/db";
+import { ordenes, productos as productosTable } from "@/db/schema";
+import { eq, inArray } from "drizzle-orm";
 
 type IncomingOrderProduct = {
   id: string;
@@ -48,194 +47,6 @@ function normalizeRequestedProducts(value: unknown) {
   };
 }
 
-async function validateProductsAgainstDatabase(
-  requestedProducts: IncomingOrderProduct[]
-) {
-  const serviceClient = await createServiceClient();
-  const productIds = requestedProducts.map((item) => item.id);
-  const { data, error } = await serviceClient
-    .from("productos")
-    .select("id, nombre, precio, stock, activo")
-    .in("id", productIds);
-
-  if (error) {
-    return {
-      error: "No se pudo validar el stock de los productos",
-      data: null,
-    };
-  }
-
-  const dbProducts = new Map((data ?? []).map((product) => [product.id, product]));
-  const validatedProducts: ValidatedOrderProduct[] = [];
-
-  for (const requestedProduct of requestedProducts) {
-    const dbProduct = dbProducts.get(requestedProduct.id);
-
-    if (!dbProduct) {
-      return {
-        error: "Uno de los productos ya no existe",
-        data: null,
-      };
-    }
-
-    if (!dbProduct.activo) {
-      return {
-        error: `El producto \"${dbProduct.nombre}\" ya no está disponible`,
-        data: null,
-      };
-    }
-
-    if (dbProduct.stock < requestedProduct.cantidad) {
-      return {
-        error: `No hay stock suficiente para \"${dbProduct.nombre}\"`,
-        data: null,
-      };
-    }
-
-    validatedProducts.push({
-      id: dbProduct.id,
-      nombre: dbProduct.nombre,
-      cantidad: requestedProduct.cantidad,
-      precio: Number(dbProduct.precio),
-    });
-  }
-
-  return { error: null, data: validatedProducts };
-}
-
-async function createOrderWithValidatedProducts({
-  userId,
-  cliente_nombre,
-  cliente_email,
-  cliente_telefono,
-  cliente_direccion,
-  cliente_ciudad,
-  productos,
-  numero_orden,
-}: {
-  userId: string;
-  cliente_nombre: string;
-  cliente_email: string;
-  cliente_telefono: string;
-  cliente_direccion: string;
-  cliente_ciudad: string;
-  productos: ValidatedOrderProduct[];
-  numero_orden: string;
-}) {
-  const serviceClient = await createServiceClient();
-
-  const { data, error } = await serviceClient.rpc(
-    "create_order_with_stock_validation",
-    {
-      p_usuario_id: userId,
-      p_cliente_nombre: cliente_nombre,
-      p_cliente_email: cliente_email,
-      p_cliente_telefono: cliente_telefono,
-      p_cliente_direccion: cliente_direccion,
-      p_cliente_ciudad: cliente_ciudad,
-      p_productos: productos.map(({ id, cantidad }) => ({ id, cantidad })),
-      p_numero_orden: numero_orden,
-    }
-  );
-
-  if (error?.code === "PGRST202") {
-    return { error: null, data: null, needsFallback: true as const };
-  }
-
-  if (error) {
-    return {
-      error: error.message || "No se pudo crear la orden",
-      data: null,
-      needsFallback: false as const,
-    };
-  }
-
-  const createdOrder = Array.isArray(data) ? data[0] : data;
-
-  return {
-    error: null,
-    data: createdOrder
-      ? {
-          id: createdOrder.id,
-          numero_orden: createdOrder.numero_orden,
-          total: Number(createdOrder.total),
-        }
-      : null,
-    needsFallback: false as const,
-  };
-}
-
-async function createOrderFallback({
-  userId,
-  cliente_nombre,
-  cliente_email,
-  cliente_telefono,
-  cliente_direccion,
-  cliente_ciudad,
-  productos,
-  numero_orden,
-}: {
-  userId: string;
-  cliente_nombre: string;
-  cliente_email: string;
-  cliente_telefono: string;
-  cliente_direccion: string;
-  cliente_ciudad: string;
-  productos: ValidatedOrderProduct[];
-  numero_orden: string;
-}) {
-  const serviceClient = await createServiceClient();
-  const total = productos.reduce(
-    (sum, item) => sum + item.precio * item.cantidad,
-    0
-  );
-
-  const { data: orden, error } = await serviceClient
-    .from("ordenes")
-    .insert({
-      usuario_id: userId,
-      cliente_nombre,
-      cliente_email,
-      cliente_telefono,
-      cliente_direccion,
-      cliente_ciudad,
-      productos,
-      total,
-      numero_orden,
-      estado: "pendiente",
-    })
-    .select("id, numero_orden, total")
-    .single();
-
-  if (error) {
-    return { error: "Error al crear la orden", data: null };
-  }
-
-  for (const item of productos) {
-    const { error: stockError } = await serviceClient.rpc("decrement_stock", {
-      product_id: item.id,
-      qty: item.cantidad,
-    });
-
-    if (stockError) {
-      await serviceClient.from("ordenes").delete().eq("id", orden.id);
-      return {
-        error: `No se pudo actualizar el stock de \"${item.nombre}\"`,
-        data: null,
-      };
-    }
-  }
-
-  return {
-    error: null,
-    data: {
-      id: orden.id,
-      numero_orden: orden.numero_orden,
-      total: Number(orden.total),
-    },
-  };
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -260,89 +71,100 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Total inválido" }, { status: 400 });
     }
 
-    const validatedProducts = await validateProductsAgainstDatabase(
-      requestedProducts.data
-    );
-    if (validatedProducts.error || !validatedProducts.data) {
-      return NextResponse.json({ error: validatedProducts.error }, { status: 400 });
+    // Authenticate user via Better Auth
+    const session = await auth.api.getSession({ headers: request.headers });
+    const userId = session?.user?.id ?? null;
+
+    // Validate stock and price with Neon DB
+    const productIds = requestedProducts.data.map((item) => item.id);
+    const dbProducts = await db
+      .select({
+        id: productosTable.id,
+        nombre: productosTable.nombre,
+        precio: productosTable.precio,
+        stock: productosTable.stock,
+        activo: productosTable.activo,
+      })
+      .from(productosTable)
+      .where(inArray(productosTable.id, productIds));
+
+    const dbProductsMap = new Map(dbProducts.map((p) => [p.id, p]));
+    const validatedProducts: ValidatedOrderProduct[] = [];
+
+    for (const requested of requestedProducts.data) {
+      const dbProd = dbProductsMap.get(requested.id);
+      if (!dbProd) {
+        return NextResponse.json({ error: "Uno de los productos ya no existe" }, { status: 400 });
+      }
+      if (!dbProd.activo) {
+        return NextResponse.json({ error: `El producto "${dbProd.nombre}" ya no está disponible` }, { status: 400 });
+      }
+      if ((dbProd.stock ?? 0) < requested.cantidad) {
+        return NextResponse.json({ error: `No hay stock suficiente para "${dbProd.nombre}"` }, { status: 400 });
+      }
+
+      validatedProducts.push({
+        id: dbProd.id,
+        nombre: dbProd.nombre,
+        cantidad: requested.cantidad,
+        precio: Number(dbProd.precio),
+      });
     }
 
-    const calculatedTotal = validatedProducts.data.reduce(
+    const calculatedTotal = validatedProducts.reduce(
       (sum, item) => sum + item.precio * item.cantidad,
       0
     );
 
     if (Math.abs(calculatedTotal - total) > 0.01) {
       return NextResponse.json(
-        {
-          error:
-            "El total del pedido cambió. Actualizá el carrito y volvé a intentarlo.",
-        },
+        { error: "El total del pedido cambió. Actualizá el carrito y volvé a intentarlo." },
         { status: 409 }
       );
     }
 
-    const user = await getAuthenticatedUser();
-
-    // Generate order number
     const numero_orden = `ORD-${Date.now().toString().slice(-10)}`;
 
-    const rpcOrderResult = await createOrderWithValidatedProducts({
-      userId: user.id,
-      cliente_nombre,
-      cliente_email,
-      cliente_telefono,
-      cliente_direccion,
-      cliente_ciudad,
-      productos: validatedProducts.data,
-      numero_orden,
-    });
-
-    let createdOrder = rpcOrderResult.data;
-
-    if (rpcOrderResult.error) {
-      console.error("Error creating order with RPC:", rpcOrderResult.error);
-      return NextResponse.json(
-        { error: rpcOrderResult.error },
-        { status: 500 }
-      );
-    }
-
-    if (rpcOrderResult.needsFallback) {
-      const fallbackOrderResult = await createOrderFallback({
-        userId: user.id,
+    // Create order
+    const [createdOrder] = await db
+      .insert(ordenes)
+      .values({
+        usuario_id: userId,
         cliente_nombre,
         cliente_email,
         cliente_telefono,
         cliente_direccion,
         cliente_ciudad,
-        productos: validatedProducts.data,
+        productos: validatedProducts,
+        total: calculatedTotal.toString(),
         numero_orden,
+        estado: "pendiente",
+      })
+      .returning({
+        id: ordenes.id,
+        numero_orden: ordenes.numero_orden,
+        total: ordenes.total,
       });
 
-      if (fallbackOrderResult.error || !fallbackOrderResult.data) {
-        return NextResponse.json(
-          { error: fallbackOrderResult.error ?? "Error al crear la orden" },
-          { status: 500 }
-        );
-      }
-
-      createdOrder = fallbackOrderResult.data;
+    // Update stock
+    for (const item of validatedProducts) {
+      const currentStock = dbProductsMap.get(item.id)?.stock ?? 0;
+      await db
+        .update(productosTable)
+        .set({ stock: Math.max(0, currentStock - item.cantidad) })
+        .where(eq(productosTable.id, item.id));
     }
 
-    // TODO: Send confirmation email (stub for now)
-    // await sendOrderConfirmationEmail(orden);
-
-    return NextResponse.json({
-      id: createdOrder?.id,
-      numero_orden: createdOrder?.numero_orden,
-      total: createdOrder?.total ?? calculatedTotal,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        id: createdOrder.id,
+        numero_orden: createdOrder.numero_orden,
+        total: Number(createdOrder.total),
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    if (error instanceof AuthorizationError) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
-    }
-
+    console.error("Error al procesar orden:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }

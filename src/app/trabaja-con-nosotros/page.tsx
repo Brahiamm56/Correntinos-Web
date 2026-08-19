@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Bullhorn, HandHeart, Leaf, Microscope } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
 
 export const metadata: Metadata = {
@@ -9,28 +10,28 @@ export const metadata: Metadata = {
 
 const oportunidades = [
   {
-    icon: "🌿",
+    Icon: Leaf,
     title: "Voluntariado Ambiental",
     description:
       "Participá en jornadas de campo, talleres educativos y actividades de conservación. No necesitás experiencia previa, solo ganas de hacer la diferencia.",
     ideal: "Estudiantes, profesionales, vecinos comprometidos",
   },
   {
-    icon: "🔬",
+    Icon: Microscope,
     title: "Investigación y Datos",
     description:
       "Si tenés formación en ciencias ambientales, biología, geografía o áreas afines, tu conocimiento puede potenciar nuestros proyectos de investigación.",
     ideal: "Profesionales y estudiantes avanzados en ciencias",
   },
   {
-    icon: "📣",
+    Icon: Bullhorn,
     title: "Comunicación y Difusión",
     description:
       "Ayudanos a amplificar el mensaje. Necesitamos personas con habilidades en redes sociales, diseño, fotografía o redacción.",
     ideal: "Comunicadores, diseñadores, creadores de contenido",
   },
   {
-    icon: "🤝",
+    Icon: HandHeart,
     title: "Alianzas Institucionales",
     description:
       "Si representás una organización, empresa o institución educativa, podemos generar sinergias que multipliquen nuestro impacto.",
@@ -40,82 +41,43 @@ const oportunidades = [
 
 export default function TrabajaConNosotrosPage() {
   return (
-    <>
-      {/* ─── HERO ─── */}
-      <section
-        className="relative pt-32 pb-20 overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(160deg, #071f17 0%, #0B3D2E 40%, #1A5C3A 100%)",
-        }}
-      >
-        <div className="absolute inset-0">
-          <div className="absolute top-[20%] left-[30%] w-[400px] h-[400px] rounded-full bg-[var(--dorado)] opacity-[0.05] blur-[100px]" />
-          <div className="absolute bottom-[10%] right-[10%] w-[300px] h-[300px] rounded-full bg-[var(--verde-menta)] opacity-[0.06] blur-[80px]" />
-        </div>
-
-        <div className="section-container relative z-10 text-center max-w-3xl mx-auto">
+    <div className="pt-[4.75rem]">
+      <section className="dark-section">
+        <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
-            <span className="section-label justify-center !text-[var(--dorado-suave)]">
-              Oportunidades
-            </span>
-            <h1 className="!text-white mb-6">
-              Sumate al{" "}
-              <span className="text-[var(--dorado)]">cambio</span>
-            </h1>
-            <p className="text-lg text-white/70 leading-relaxed mx-auto">
-              Buscamos personas comprometidas que quieran aportar su tiempo,
-              conocimiento o recursos a la lucha contra el cambio climático en
-              Corrientes.
-            </p>
+            <div className="grid gap-9 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-end">
+              <div><span className="section-label !text-[var(--dorado-suave)]">Participar</span><h1 className="!text-white">Tu experiencia puede convertirse en acción.</h1></div>
+              <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">Hay lugar para el tiempo, las ideas, el conocimiento profesional y las alianzas que ayuden a cuidar Corrientes.</p>
+            </div>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* ─── OPPORTUNITIES ─── */}
       <section className="bg-white">
-        <div className="section-container">
+        <div className="section-container !py-16 sm:!py-20">
           <AnimatedSection>
-            <div className="text-center mb-16">
-              <span className="section-label justify-center">
-                ¿Cómo podés participar?
-              </span>
-              <h2>Formas de sumarte</h2>
-            </div>
+            <div className="grid gap-6 border-b border-[var(--border-strong)] pb-8 lg:grid-cols-2 lg:items-end"><div><span className="section-label">¿Cómo podés participar?</span><h2>Encontrá tu forma de sumarte.</h2></div><p className="text-[var(--gris-calido)]">No hace falta encajar en un perfil único. Buscamos compromiso, responsabilidad y ganas de aprender con otras personas.</p></div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {oportunidades.map((op, i) => (
-              <AnimatedSection key={op.title} delay={i * 100}>
-                <div className="glass-card p-8 h-full flex flex-col">
-                  <span className="text-4xl mb-4">{op.icon}</span>
-                  <h3 className="text-xl mb-3">{op.title}</h3>
-                  <p className="text-[var(--gris-calido)] leading-relaxed flex-1 mb-4">
-                    {op.description}
-                  </p>
-                  <p className="text-xs font-semibold text-[var(--verde-hoja)] border-t border-[var(--border)] pt-4">
-                    Ideal para: {op.ideal}
-                  </p>
-                </div>
-              </AnimatedSection>
-            ))}
+          <div className="grid md:grid-cols-2">
+            {oportunidades.map((op, i) => {
+              const Icon = op.Icon;
+              return <AnimatedSection key={op.title} delay={i * 100}>
+                <article className={`h-full border-b border-[var(--border)] py-8 md:px-8 ${i % 2 === 1 ? "md:border-l" : ""}`}>
+                  <Icon size={27} className="text-[var(--verde-hoja)]" /><h3 className="mt-6 text-2xl">{op.title}</h3><p className="mt-4 leading-relaxed text-[var(--gris-calido)]">{op.description}</p><p className="mt-6 border-t border-[var(--border)] pt-4 text-xs font-bold uppercase tracking-[0.07em] text-[var(--verde-hoja)]">Puede interesarle a: {op.ideal}</p>
+                </article>
+              </AnimatedSection>;
+            })}
           </div>
         </div>
       </section>
 
-      {/* ─── HOW TO APPLY ─── */}
-      <section className="bg-[var(--crema)]">
-        <div className="section-container">
+      <section className="paper-section border-y border-[var(--border)]">
+        <div className="section-container !py-16 sm:!py-20">
           <AnimatedSection>
-            <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-12">
-                <span className="section-label justify-center">
-                  Proceso
-                </span>
-                <h2>¿Cómo postularte?</h2>
-              </div>
-
-              <div className="space-y-6">
+            <div className="grid gap-10 lg:grid-cols-[minmax(14rem,0.7fr)_minmax(0,1.3fr)]">
+              <div><span className="section-label">Proceso</span><h2>Empezar es simple.</h2><p className="mt-4 text-[var(--gris-calido)]">Primero queremos conocerte y entender cómo te gustaría participar.</p></div>
+              <div className="border-t border-[var(--border-strong)]">
                 {[
                   {
                     step: "01",
@@ -132,20 +94,10 @@ export default function TrabajaConNosotrosPage() {
                     title: "Conversamos",
                     text: "Coordinamos una charla para conocernos, entender tus expectativas y encontrar el mejor espacio para vos en la fundación.",
                   },
-                ].map((item, i) => (
-                  <AnimatedSection key={item.step} delay={i * 120}>
-                    <div className="glass-card p-6 flex items-start gap-6">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--verde-selva)] to-[var(--verde-hoja)] flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg">
-                        {item.step}
-                      </div>
-                      <div>
-                        <h3 className="text-lg mb-1">{item.title}</h3>
-                        <p className="text-sm text-[var(--gris-calido)] leading-relaxed">
-                          {item.text}
-                        </p>
-                      </div>
-                    </div>
-                  </AnimatedSection>
+                ].map((item) => (
+                  <div key={item.step} className="grid gap-3 border-b border-[var(--border)] py-7 sm:grid-cols-[3rem_minmax(10rem,0.65fr)_minmax(0,1.35fr)] sm:gap-6">
+                    <p className="font-extrabold text-[var(--verde-hoja)]">{item.step}</p><h3 className="!text-xl">{item.title}</h3><p className="text-sm leading-relaxed text-[var(--gris-calido)]">{item.text}</p>
+                  </div>
                 ))}
               </div>
             </div>
@@ -153,30 +105,15 @@ export default function TrabajaConNosotrosPage() {
         </div>
       </section>
 
-      {/* ─── CTA ─── */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--verde-profundo) 0%, var(--verde-selva) 100%)",
-        }}
-      >
-        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[var(--dorado)] opacity-[0.06] blur-3xl" />
-
-        <div className="section-container relative z-10">
+      <section className="warm-section">
+        <div className="section-container !py-16 sm:!py-20">
           <AnimatedSection>
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="!text-white mb-6">
-                ¿Listo para hacer la diferencia?
-              </h2>
-              <p className="text-lg text-white/70 mb-10 mx-auto">
-                No importa tu experiencia ni tu profesión. Lo que compartimos es
-                la convicción de que Corrientes merece un futuro sustentable.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div><h2>¿Conversamos?</h2><p className="mt-4 max-w-2xl text-lg text-[var(--gris-calido)]">Contanos qué te motiva, qué sabés hacer y cuánto tiempo te gustaría dedicar.</p></div>
+              <div className="flex flex-col gap-4 sm:flex-row">
                 <a
                   href="mailto:correntinosclim@gmail.com?subject=Quiero%20sumarme%20a%20la%20fundación"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-full bg-[var(--dorado)] text-[var(--verde-profundo)] hover:bg-[var(--dorado-suave)] transition-all duration-300 hover:-translate-y-1 shadow-lg"
+                  className="action-primary"
                   id="apply-email-cta"
                 >
                   Envianos un email
@@ -185,7 +122,7 @@ export default function TrabajaConNosotrosPage() {
                   href="https://wa.me/543794059015?text=Hola!%20Quiero%20sumarme%20a%20la%20fundación"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-full border-2 border-white/30 text-white hover:bg-white/10 transition-all duration-300 hover:-translate-y-1"
+                  className="action-link justify-center"
                   id="apply-whatsapp-cta"
                 >
                   Escribinos por WhatsApp
@@ -195,6 +132,6 @@ export default function TrabajaConNosotrosPage() {
           </AnimatedSection>
         </div>
       </section>
-    </>
+    </div>
   );
 }
