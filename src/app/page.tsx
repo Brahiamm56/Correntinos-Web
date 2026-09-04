@@ -35,7 +35,12 @@ const trustSignals = [
   { value: "NEA", label: "Una agenda regional" },
 ];
 
-const fallbackNewsCovers = ["/research-bg.png", "/education-bg.png", "/community-bg.png"];
+const fallbackNewsCovers = [
+  "/hero-section/imagen-hero1.jpg",
+  "/hero-section/imagen-hero2.jpg",
+  "/hero-section/imagen-hero3.jpeg",
+  "/hero-section/imagen-hero4.jpg",
+];
 
 async function getFeaturedProductos() {
   try {
@@ -120,7 +125,18 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="mision" className="dark-section">
+      <section id="mision" className="relative isolate overflow-hidden dark-section">
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/nuestra-razon-de-ser/Nuestra-razon-de-ser.jpg"
+            alt="Nuestra razón de ser - Correntinos contra el cambio climático"
+            fill
+            sizes="100vw"
+            quality={90}
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-[#071f17]/82 backdrop-blur-[1.5px]" />
+        </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
             <div className="grid gap-9 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)] lg:items-end">

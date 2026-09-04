@@ -116,9 +116,35 @@ export default function Header() {
   return <>
     <header className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300 ${isTransparent ? "border-transparent bg-transparent" : "border-[var(--border)] bg-white/95 shadow-[0_8px_28px_rgba(16,60,46,0.06)] backdrop-blur-xl"}`}>
       <nav className="mx-auto flex h-[4.75rem] max-w-[var(--container-max)] items-center justify-between px-[var(--section-padding-x)]" aria-label="Navegación principal">
-        <Link href="/" className="flex items-center gap-3" aria-label="Ir al inicio">
-          <Image src="/correntinos-logo.png" alt="" width={52} height={52} priority className="h-12 w-12 object-contain" />
-          <span className={`hidden text-sm leading-tight sm:block ${isTransparent ? "text-white" : "text-[var(--verde-profundo)]"}`} style={{ fontFamily: "var(--font-heading)" }}>Correntinos<span className="mt-0.5 block font-sans text-[9px] font-bold uppercase tracking-[0.1em] opacity-70">Contra el cambio climático</span></span>
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3" aria-label="Ir al inicio">
+          <Image
+            src="/correntinos-logo.png"
+            alt="Fundación Correntinos Contra el Cambio Climático"
+            width={64}
+            height={64}
+            quality={95}
+            priority
+            className="h-11 w-11 sm:h-12 sm:w-12 object-contain shrink-0"
+          />
+          <span
+            className={`text-base font-bold leading-tight sm:hidden ${
+              isTransparent ? "text-white" : "text-[var(--verde-profundo)]"
+            }`}
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Correntinos CCC
+          </span>
+          <span
+            className={`hidden text-sm leading-tight sm:block ${
+              isTransparent ? "text-white" : "text-[var(--verde-profundo)]"
+            }`}
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Correntinos
+            <span className="mt-0.5 block font-sans text-[9px] font-bold uppercase tracking-[0.1em] opacity-70">
+              Contra el cambio climático
+            </span>
+          </span>
         </Link>
         <ul className="hidden items-center gap-6 lg:flex">
           {navLinks.map((link) => <li key={link.href}><Link href={link.href} className={`relative py-2 text-sm font-bold transition-colors after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-left after:bg-[var(--dorado)] after:transition-transform ${isActive(link.href) ? `${isTransparent ? "text-white" : "text-[var(--verde-profundo)]"} after:scale-x-100` : `${isTransparent ? "text-white/75 hover:text-white" : "text-[var(--gris-medio)] hover:text-[var(--verde-profundo)]"} after:scale-x-0 hover:after:scale-x-100`}`}>{link.label}</Link></li>)}

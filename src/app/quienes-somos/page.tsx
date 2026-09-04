@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Bullhorn, Eye, Globe, HandHeart, Leaf, Microscope, Scale, Target } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
 import CrossfadeImages from "@/components/CrossfadeImages";
@@ -26,9 +27,8 @@ const consejo = [
 ];
 
 const comunidadImages = [
-  { src: "/comunidad.png", alt: "Asamblea en defensa del Parque Caraguatá", position: "50% 50%" },
-  { src: "/comunidad2.png", alt: "Vecinos reunidos en asamblea por el Parque Caraguatá", position: "50% 50%" },
-  { src: "/comunidad3.png", alt: "Participación comunitaria en defensa del Parque Caraguatá", position: "50% 42%" },
+  { src: "/hero-section/imagen-hero4.jpg", alt: "Asamblea en defensa del Parque Caraguatá", position: "50% 50%" },
+  { src: "/hero-section/imagen-hero1.jpg", alt: "Vecinos y activistas en defensa del ambiente", position: "50% 50%" },
 ];
 
 const hitos = [
@@ -39,13 +39,23 @@ const hitos = [
   { year: "2022", title: "Participación internacional", text: "La organización de la LCOY nos abrió las puertas a espacios internacionales clave. Participamos en la RCOY en Costa Rica, la COY en Egipto y el C40 en Buenos Aires, llevando la voz del litoral y visibilizando las problemáticas ambientales que enfrenta nuestra región en el contexto de la crisis climática global." },
   { year: "2023", title: "Formalización", text: "Consolidamos nuestro crecimiento con la constitución legal de la organización como fundación." },
   { year: "2025", title: "Educación ambiental", text: "Lanzamos el programa \"Ñangareko Yvy\", a través del cual desarrollamos charlas, talleres y actividades lúdicas, alcanzando a más de 300 jóvenes de 10 escuelas." },
-  { year: "2026", title: "Acción legal ambiental", text: "Dimos un paso clave en la defensa del ambiente al involucrarnos en nuestra primera demanda judicial, en el marco de la causa por desmontes ilegales en el Parque Caraguatá, en Resistencia." },
 ];
 
 export default function QuienesSomosPage() {
   return (
     <div className="pt-[4.75rem]">
-      <section className="dark-section">
+      <section className="relative isolate overflow-hidden dark-section">
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/hero-section/imagen-hero2.jpg"
+            alt="Acción local para una crisis global"
+            fill
+            sizes="100vw"
+            quality={90}
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-[#071f17]/82 backdrop-blur-[1.5px]" />
+        </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
             <div className="grid gap-9 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-end">
@@ -93,7 +103,7 @@ export default function QuienesSomosPage() {
               <Target size={28} className="text-[var(--verde-hoja)]" />
               <h2 className="mt-6 text-3xl">Misión</h2>
               <p className="mt-4 leading-relaxed text-[var(--gris-calido)]">
-                Generar acción climática real en Corrientes mediante educación ambiental, investigación científica e incidencia en políticas públicas, fortaleciendo la resiliencia de comunidades y ecosistemas.
+                Generar acción climática real en Corrientes mediante educación ambiental, participación ciudadana e incidencia en políticas públicas, fortaleciendo la resiliencia de comunidades y ecosistemas.
               </p>
             </article>
           </AnimatedSection>
@@ -102,7 +112,7 @@ export default function QuienesSomosPage() {
               <Eye size={28} className="text-[var(--dorado)]" />
               <h2 className="mt-6 text-3xl">Visión</h2>
               <p className="mt-4 leading-relaxed text-[var(--gris-calido)]">
-                Ser una referencia en acción climática en el Nordeste argentino y acompañar una transición que proteja los ecosistemas únicos de Corrientes y el futuro de sus comunidades.
+                Ser una referencia en acción climática en el Nordeste argentino y acompañar una transición que proteja tanto al ambiente como a las comunidades que lo habitan.
               </p>
             </article>
           </AnimatedSection>
@@ -134,19 +144,48 @@ export default function QuienesSomosPage() {
       <section className="bg-white">
         <div className="section-container !py-16 sm:!py-20">
           <AnimatedSection>
-            <div className="grid gap-8 lg:grid-cols-[minmax(16rem,0.7fr)_minmax(0,1.3fr)]">
-              <div><span className="section-label">Las personas</span><h2 className="section-title">Una organización, muchas formas de participar.</h2></div>
+            <div className="grid gap-12 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] lg:gap-16 lg:items-start">
               <div>
-                <div className="border-y border-[var(--border-strong)] py-7">
-                  <h3 className="text-2xl">Consejo de Administración</h3>
-                  <p className="mt-2 text-sm text-[var(--gris-calido)]">Conducción institucional y decisiones estratégicas de la fundación.</p>
-                  <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
-                    {consejo.map((miembro) => <div key={miembro.nombre}><h4 className="font-semibold text-[var(--verde-profundo)]">{miembro.nombre}</h4><p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[var(--verde-hoja)]">{miembro.rol}</p></div>)}
+                <span className="section-label">Las personas</span>
+                <h2 className="section-title !text-3xl sm:!text-4xl lg:!text-5xl !leading-[1.1]">
+                  Una organización, muchas formas de participar.
+                </h2>
+                <p className="mt-5 text-base leading-relaxed text-[var(--gris-calido)]">
+                  Un equipo interdisciplinario que combina conducción estratégica, coordinación operativa y la fuerza del voluntariado en el territorio.
+                </p>
+              </div>
+              <div className="space-y-0">
+                <div className="border-y border-[var(--border-strong)] py-8">
+                  <h3 className="text-2xl sm:text-3xl">Consejo de Administración</h3>
+                  <p className="mt-2 text-sm text-[var(--gris-calido)]">
+                    Conducción institucional y decisiones estratégicas de la fundación.
+                  </p>
+                  <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4">
+                    {consejo.map((miembro) => (
+                      <div key={miembro.nombre} className="flex flex-col">
+                        <p className="font-sans text-sm font-bold leading-tight text-[var(--verde-profundo)] sm:text-base">
+                          {miembro.nombre}
+                        </p>
+                        <span className="mt-1.5 inline-block text-[11px] font-extrabold uppercase tracking-[0.08em] text-[var(--verde-hoja)]">
+                          {miembro.rol}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="grid gap-7 border-b border-[var(--border)] py-7 sm:grid-cols-2">
-                  <div><h3 className="text-xl">Equipo de Coordinación</h3><p className="mt-3 text-sm leading-relaxed text-[var(--gris-calido)]">Lidera, organiza y acompaña los proyectos para asegurar su desarrollo e impacto.</p></div>
-                  <div><h3 className="text-xl">Voluntariado</h3><p className="mt-3 text-sm leading-relaxed text-[var(--gris-calido)]">Más de 90 personas aportan tiempo y energía en distintos puntos del NEA.</p></div>
+                <div className="grid gap-8 border-b border-[var(--border-strong)] py-8 sm:grid-cols-2 sm:gap-10">
+                  <div className="flex flex-col">
+                    <h3 className="text-xl sm:text-2xl">Equipo de Coordinación</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-[var(--gris-calido)]">
+                      Lidera, organiza y acompaña los proyectos para asegurar su desarrollo e impacto.
+                    </p>
+                  </div>
+                  <div className="flex flex-col">
+                    <h3 className="text-xl sm:text-2xl">Voluntariado</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-[var(--gris-calido)]">
+                      Más de 90 personas aportan tiempo y energía en distintos puntos del NEA.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

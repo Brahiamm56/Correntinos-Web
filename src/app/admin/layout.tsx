@@ -81,7 +81,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="border-b border-white/10 p-5">
           <Link href="/admin" className="flex items-center gap-3">
-            <Image src="/correntinos-logo.png" alt="" width={42} height={42} className="h-10 w-10 object-contain" />
+            <Image src="/correntinos-logo.png" alt="" width={64} height={64} quality={95} className="h-10 w-10 object-contain" />
             <div><h2 className="font-sans text-sm font-bold !text-white">Administración</h2><p className="text-[11px] text-white/50">Fundación Correntinos</p></div>
           </Link>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ArrowRight, Envelope, Leaf, Phone, ShieldCheck } from "reicon-react";
 
 const amounts = ["1.000", "5.000", "10.000", "25.000"];
@@ -32,19 +33,35 @@ export default function DonacionesClient({ email, phone }: { email: string; phon
 
   return (
     <div className="min-h-screen bg-[var(--papel)] pt-[4.75rem]">
-      <section className="section-container !pb-14 !pt-9 sm:!pb-20 sm:!pt-16">
-        <div className="grid gap-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:items-end">
-          <div className="max-w-3xl">
-            <p className="section-label">Donaciones</p>
-            <h1>Doná para sostener la acción climática.</h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--gris-calido)] sm:text-lg">
-              Elegí un monto y coordiná tu aporte con el equipo.
+      <section className="relative isolate overflow-hidden dark-section">
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/hero-section/imagen-hero1.jpg"
+            alt="Donar para sostener la acción climática"
+            fill
+            sizes="100vw"
+            quality={90}
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-[#071f17]/85 backdrop-blur-[1.5px]" />
+        </div>
+        <div className="section-container !py-16 sm:!py-24">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:items-end">
+            <div className="max-w-3xl">
+              <p className="section-label !text-[var(--dorado-suave)]">Donaciones</p>
+              <h1 className="!text-white">Doná para sostener la acción climática.</h1>
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+                Elegí un monto y coordiná tu aporte directamente con el equipo.
+              </p>
+            </div>
+            <p className="hidden border-t border-white/20 pt-5 text-sm leading-relaxed text-white/70 lg:block">
+              Abajo te contamos qué sostiene cada donación y cómo se acompaña el trabajo en territorio.
             </p>
           </div>
-          <p className="hidden border-t border-[var(--border-strong)] pt-5 text-sm leading-relaxed text-[var(--gris-calido)] lg:block">
-            Abajo te contamos qué sostiene cada donación y cómo se acompaña el trabajo en territorio.
-          </p>
         </div>
+      </section>
+
+      <section className="section-container !pb-14 !pt-9 sm:!pb-20 sm:!pt-12">
 
         <fieldset className="mt-7 border-y border-[var(--border-strong)] py-2 sm:mt-12">
           <legend className="sr-only">Elegí un monto de referencia</legend>

@@ -57,7 +57,7 @@ function RegisterForm() {
         <div className="border-y border-[var(--border)] py-9 sm:px-3">
           <div className="text-center mb-8">
             <Link href="/" className="inline-block mb-4">
-              <Image src="/correntinos-logo.png" alt="Fundación Correntinos Contra el Cambio Climático" width={64} height={64} className="h-16 w-16 object-contain" />
+              <Image src="/correntinos-logo.png" alt="Fundación Correntinos Contra el Cambio Climático" width={80} height={80} quality={95} className="h-16 w-16 object-contain" />
             </Link>
             <h1 className="text-2xl mb-2">Crear Cuenta</h1>
             <p className="text-sm text-[var(--gris-calido)]">

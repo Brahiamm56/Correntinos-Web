@@ -7,9 +7,10 @@ import CrossfadeImages from "@/components/CrossfadeImages";
 import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 const communityHeroImages = [
-  { src: "/comunidad.png", alt: "", position: "50% 50%" },
-  { src: "/comunidad2.png", alt: "", position: "50% 50%" },
-  { src: "/comunidad3.png", alt: "", position: "50% 42%" },
+  { src: "/hero-section/imagen-hero1.jpg", alt: "Acción ambiental comunitaria en Corrientes", position: "50% 50%" },
+  { src: "/hero-section/imagen-hero2.jpg", alt: "Cumbre Climática de las Juventudes LCOY", position: "50% 50%" },
+  { src: "/hero-section/imagen-hero3.jpeg", alt: "Educación ambiental y talleres participativos", position: "50% 50%" },
+  { src: "/hero-section/imagen-hero4.jpg", alt: "Comunidad en defensa del Parque Caraguatá", position: "50% 50%" },
 ];
 
 export default function HeroScene({ intro }: { intro?: string }) {

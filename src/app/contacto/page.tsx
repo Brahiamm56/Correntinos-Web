@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import type { ComponentType } from "react";
-import { Envelope, Instagram, MapPoint, MessageCircle, Phone } from "reicon-react";
+import { Envelope, Instagram, MapPoint, Phone } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
 import { getPublicConfiguration } from "@/lib/configuracion";
 
@@ -24,18 +25,34 @@ export default async function ContactoPage() {
 
   return (
     <div className="pt-[4.75rem]">
-      <section className="dark-section">
+      <section className="relative isolate overflow-hidden dark-section">
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/hero-section/imagen-hero1.jpg"
+            alt="Contacto - Correntinos contra el cambio climático"
+            fill
+            sizes="100vw"
+            quality={90}
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-[#071f17]/85 backdrop-blur-[1.5px]" />
+        </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
             <div className="grid gap-9 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-end">
-              <div><span className="section-label !text-[var(--dorado-suave)]">Hablemos</span><h1 className="!text-white">Las buenas alianzas empiezan con una conversación.</h1></div>
-              <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">Consultas, propuestas, prensa o ganas de sumarte: elegí el canal que te resulte más cómodo.</p>
+              <div>
+                <span className="section-label !text-[var(--dorado-suave)]">Hablemos</span>
+                <h1 className="!text-white">¿Tenés una idea, una propuesta o querés involucrarte? Hablemos.</h1>
+              </div>
+              <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">
+                Consultas, propuestas, prensa o ganas de sumarte: elegí el canal que te resulte más cómodo.
+              </p>
             </div>
           </AnimatedSection>
         </div>
       </section>
 
-      <section className="bg-white">
+      <section className="border-b border-[var(--border)] bg-white">
         <div className="section-container !py-16 sm:!py-20">
           <div className="mx-auto max-w-5xl border-t border-[var(--border-strong)]">
             {contactInfo.map((item, i) => {
@@ -56,25 +73,6 @@ export default async function ContactoPage() {
               );
             })}
           </div>
-        </div>
-      </section>
-
-      <section className="warm-section border-t border-[var(--dorado)]/25">
-        <div className="section-container !py-16 sm:!py-20">
-          <AnimatedSection>
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-              <div><MessageCircle size={28} className="text-[var(--verde-hoja)]" /><h2 className="section-title mt-5">¿Preferís WhatsApp?</h2><p className="mt-4 text-lg text-[var(--gris-calido)]">Escribinos directamente para consultas, propuestas o colaboraciones.</p></div>
-              <a
-                href={`https://wa.me/${phoneHref.replace("+", "")}?text=${encodeURIComponent("Hola, me interesa saber más sobre la fundación.")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="action-primary"
-              >
-                <MessageCircle size={20} />
-                Escribinos por WhatsApp
-              </a>
-            </div>
-          </AnimatedSection>
         </div>
       </section>
     </div>
