@@ -132,7 +132,7 @@ export default function Header() {
             }`}
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            Correntinos CCC
+            Correntinos Contra el Cambio Climático
           </span>
           <span
             className={`hidden text-sm leading-tight sm:block ${
