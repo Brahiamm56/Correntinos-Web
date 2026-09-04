@@ -15,7 +15,6 @@ const impactAreas = [
       "Estamos convencidos de que para generar los cambios necesarios hacia una sociedad que cuide el ambiente, primero debemos tomar conciencia del impacto de nuestras acciones. Por eso, llevamos adelante distintos programas que buscan concientizar a la ciudadanía y promoverla como agente de cambio.",
     images: [
       { src: "/Concientizacion/concientizacion.jpg", alt: "Educación ambiental y concientización", position: "50% 50%" },
-      { src: "/Concientizacion/concientizacion1.png", alt: "Taller de huerta comunitaria", position: "50% 50%" },
       { src: "/Concientizacion/concientizacion2.png", alt: "Preparación del suelo y agroecología", position: "50% 50%" },
       { src: "/Concientizacion/concientizacion3.png", alt: "Siembra y aprendizaje colectivo", position: "50% 50%" },
     ],

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Bullhorn, Eye, Globe, HandHeart, Leaf, Microscope, Scale, Target } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
-import CrossfadeImages from "@/components/CrossfadeImages";
 
 export const metadata: Metadata = {
   title: "Quiénes Somos",
@@ -24,11 +23,6 @@ const consejo = [
   { nombre: "Camila Núñez", rol: "Secretaria" },
   { nombre: "Deborah Iserre", rol: "Tesorera" },
   { nombre: "Nicolás Duarte", rol: "Fundador" },
-];
-
-const comunidadImages = [
-  { src: "/hero-section/imagen-hero4.jpg", alt: "Asamblea en defensa del Parque Caraguatá", position: "50% 50%" },
-  { src: "/hero-section/imagen-hero1.jpg", alt: "Vecinos y activistas en defensa del ambiente", position: "50% 50%" },
 ];
 
 const hitos = [
@@ -66,31 +60,6 @@ export default function QuienesSomosPage() {
               <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">
                 Somos una fundación correntina nacida de la urgencia climática y de la convicción de que organizarse transforma el territorio.
               </p>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      <section className="bg-white">
-        <div className="section-container grid gap-9 !py-16 lg:grid-cols-[minmax(0,1.12fr)_minmax(20rem,0.88fr)] lg:items-end sm:!py-20">
-          <AnimatedSection>
-            <CrossfadeImages
-              images={comunidadImages}
-              sizes="(max-width: 1024px) 100vw, 58vw"
-              quality={90}
-              intervalSeconds={5.5}
-              className="aspect-[4/3] bg-[var(--verde-palido)]"
-            />
-          </AnimatedSection>
-          <AnimatedSection delay={120}>
-            <div className="border-t border-[var(--border-strong)] pt-6">
-              <span className="section-label">Comunidad en acción</span>
-              <h2 className="text-3xl sm:text-4xl">Asamblea en defensa del Parque Caraguatá.</h2>
-              <div className="mt-5 space-y-4 text-base leading-relaxed text-[var(--gris-calido)] sm:text-lg">
-                <p>Casi 100 vecinos participaron de una asamblea histórica para defender el último pulmón verde de Resistencia.</p>
-                <p>Nos reunimos vecinos, activistas, investigadores y biólogos para expresar la preocupación por el desmonte que afectó parte del espacio destinado a ser Reserva Municipal, aprobada por ordenanza de manera unánime.</p>
-                <p>De manera conjunta se decidió presentar un petitorio ante la Municipalidad y seguir trabajando para que el Caraguatá sea una reserva natural para la comunidad.</p>
-              </div>
             </div>
           </AnimatedSection>
         </div>
