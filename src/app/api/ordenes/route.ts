@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getPublicConfiguration } from "@/lib/configuracion";
 import { db } from "@/db";
 import { ordenes, productos as productosTable } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
@@ -16,6 +17,53 @@ type ValidatedOrderProduct = IncomingOrderProduct & {
 
 function normalizeTextField(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function buildWhatsAppUrl({
+  number,
+  orderNumber,
+  products,
+  total,
+  customer,
+  wantsShipping,
+  pickupAddress,
+  instructions,
+}: {
+  number: string;
+  orderNumber: string;
+  products: ValidatedOrderProduct[];
+  total: number;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+  };
+  wantsShipping: boolean;
+  pickupAddress: string;
+  instructions: string;
+}) {
+  const deliveryDetails = wantsShipping
+    ? `Envío: ${customer.address}, ${customer.city}`
+    : `Retiro o entrega: ${pickupAddress}`;
+  const message = [
+    "Hola, quiero realizar este pedido en Correntinos.",
+    `Número de pedido: ${orderNumber}`,
+    "",
+    "Productos:",
+    ...products.map((item) => `- ${item.nombre} x${item.cantidad} — $${(item.precio * item.cantidad).toLocaleString("es-AR")}`),
+    `Total: $${total.toLocaleString("es-AR")}`,
+    "",
+    `Nombre: ${customer.name}`,
+    `Email: ${customer.email}`,
+    `Teléfono: ${customer.phone}`,
+    deliveryDetails,
+    "",
+    instructions,
+  ].join("\n");
+
+  return `https://wa.me/${number.replace(/[^\d]/g, "")}?text=${encodeURIComponent(message)}`;
 }
 
 function normalizeRequestedProducts(value: unknown) {
@@ -133,6 +181,7 @@ export async function POST(request: NextRequest) {
     }
 
     const numero_orden = `ORD-${Date.now().toString().slice(-10)}`;
+    const configuration = await getPublicConfiguration();
 
     // Create order
     const [createdOrder] = await db
@@ -164,11 +213,29 @@ export async function POST(request: NextRequest) {
         .where(eq(productosTable.id, item.id));
     }
 
+    const whatsapp_url = buildWhatsAppUrl({
+      number: configuration.whatsapp,
+      orderNumber: createdOrder.numero_orden ?? numero_orden,
+      products: validatedProducts,
+      total: calculatedTotal,
+      customer: {
+        name: cliente_nombre,
+        email: cliente_email,
+        phone: cliente_telefono,
+        address: cliente_direccion,
+        city: cliente_ciudad,
+      },
+      wantsShipping: quiere_envio,
+      pickupAddress: configuration.pickupAddress,
+      instructions: configuration.orderInstructions,
+    });
+
     return NextResponse.json(
       {
         id: createdOrder.id,
         numero_orden: createdOrder.numero_orden,
         total: Number(createdOrder.total),
+        whatsapp_url,
       },
       { status: 201 }
     );

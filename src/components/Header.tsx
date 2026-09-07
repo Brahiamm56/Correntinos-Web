@@ -26,7 +26,7 @@ const subscribeToClient = () => () => {};
 const getClientSnapshot = () => true;
 const getServerClientSnapshot = () => false;
 
-export default function Header() {
+export default function Header({ whatsapp }: { whatsapp: string }) {
   const [openPath, setOpenPath] = useState<string | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
@@ -104,7 +104,7 @@ export default function Header() {
             <Link href="/trabaja-con-nosotros" className="mt-4 inline-flex min-h-11 items-center gap-2 border-b border-white/35 text-sm font-bold text-white">Sumarme como voluntario <ArrowRight size={17} /></Link>
             <div className="mt-8 flex items-center gap-3 text-white/70">
               <a href="https://www.instagram.com/correntinosclim/" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram"><Instagram size={22} /></a>
-              <a href="https://wa.me/543794059015" target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp"><ChatRound size={22} /></a>
+              <a href={`https://wa.me/${whatsapp.replace(/[^\d]/g, "")}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp"><ChatRound size={22} /></a>
               <a href="mailto:correntinosclim@gmail.com" title="Correo electrónico" aria-label="Correo electrónico"><Envelope size={22} /></a>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function Header() {
       <nav className="mx-auto flex h-[4.75rem] max-w-[var(--container-max)] items-center justify-between px-[var(--section-padding-x)]" aria-label="Navegación principal">
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3" aria-label="Ir al inicio">
           <Image
-            src="/correntinos-logo.png"
+            src="/cccclogo.png"
             alt="Fundación Correntinos Contra el Cambio Climático"
             width={64}
             height={64}

@@ -17,10 +17,10 @@ const getInvolved = [
   { href: "/contacto", label: "Contacto" },
 ];
 
-export default function Footer({ email, phone }: { email: string; phone: string }) {
+export default function Footer({ email, whatsapp, location }: { email: string; whatsapp: string; location: string }) {
   const pathname = usePathname();
-  const phoneHref = phone.replace(/[^+\d]/g, "");
   if (pathname.startsWith("/admin")) return null;
+  const whatsappHref = whatsapp.replace(/[^\d]/g, "");
   return <footer className="bg-[#0a2f23] text-white">
     <div className="section-container !pb-8 !pt-16">
       <div className="mb-14 border-b border-white/15 pb-12 md:grid md:grid-cols-[1.4fr_0.6fr] md:items-end md:gap-12">
@@ -31,12 +31,12 @@ export default function Footer({ email, phone }: { email: string; phone: string 
         <div>
           <Link href="/" className="inline-flex items-center gap-3" aria-label="Ir al inicio"><Image src="/correntinos-logo.png" alt="Fundación Correntinos Contra el Cambio Climático" width={64} height={64} quality={95} className="h-14 w-14 object-contain" /><span className="text-lg leading-tight text-white" style={{ fontFamily: "var(--font-heading)" }}>Fundación Correntinos<span className="mt-1 block font-sans text-[10px] font-bold uppercase tracking-[0.1em] text-white/55">Contra el cambio climático</span></span></Link>
           <p className="mt-5 text-sm leading-relaxed text-white/65">Impulsamos educación ambiental, participación ciudadana e incidencia pública para cuidar los ecosistemas y comunidades del Nordeste argentino.</p>
-          <div className="mt-7 flex items-center gap-5 text-white/80"><a href="https://www.instagram.com/correntinosclim/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram" className="grid h-11 w-11 place-items-center border border-white/20 transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado)]"><Instagram size={21} /></a><a href={`https://wa.me/${phoneHref.replace("+", "")}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp" className="grid h-11 w-11 place-items-center border border-white/20 transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado)]"><ChatRound size={21} /></a><a href={`mailto:${email}`} aria-label="Correo electrónico" title="Correo electrónico" className="grid h-11 w-11 place-items-center border border-white/20 transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado)]"><Envelope size={21} /></a></div>
+          <div className="mt-7 flex items-center gap-5 text-white/80"><a href="https://www.instagram.com/correntinosclim/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram" className="grid h-11 w-11 place-items-center border border-white/20 transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado)]"><Instagram size={21} /></a><a href={`https://wa.me/${whatsappHref}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp" className="grid h-11 w-11 place-items-center border border-white/20 transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado)]"><ChatRound size={21} /></a><a href={`mailto:${email}`} aria-label="Correo electrónico" title="Correo electrónico" className="grid h-11 w-11 place-items-center border border-white/20 transition-colors hover:border-[var(--dorado)] hover:text-[var(--dorado)]"><Envelope size={21} /></a></div>
         </div>
         <div><h3 className="font-sans text-xs font-bold uppercase tracking-[0.1em] !text-[var(--dorado-suave)]">Navegación</h3><ul className="mt-5 space-y-3">{navigation.map((item) => <li key={item.href}><Link href={item.href} className="text-sm text-white/65 transition-colors hover:text-white">{item.label}</Link></li>)}</ul></div>
         <div><h3 className="font-sans text-xs font-bold uppercase tracking-[0.1em] !text-[var(--dorado-suave)]">Involucrate</h3><ul className="mt-5 space-y-3">{getInvolved.map((item) => <li key={item.href}><Link href={item.href} className="text-sm text-white/65 transition-colors hover:text-white">{item.label}</Link></li>)}</ul></div>
       </div>
-      <div className="mt-12 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/65 sm:flex-row sm:items-center"><p>© {new Date().getFullYear()} Fundación Correntinos Contra el Cambio Climático.</p><p className="flex items-center gap-1.5"><MapPoint size={15} /> Corrientes, Argentina</p></div>
+      <div className="mt-12 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/65 sm:flex-row sm:items-center"><p>© {new Date().getFullYear()} Fundación Correntinos Contra el Cambio Climático.</p><p className="flex items-center gap-1.5"><MapPoint size={15} /> {location}</p></div>
     </div>
   </footer>;
 }

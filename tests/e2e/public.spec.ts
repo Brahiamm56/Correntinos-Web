@@ -39,7 +39,7 @@ test.describe("experiencia pública", () => {
 
   test("el logo real carga en la cabecera", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const logo = page.locator('header img[src*="correntinos-logo.png"]');
+    const logo = page.locator('header img[src*="cccclogo.png"]');
     await expect(logo).toBeVisible();
     expect(await logo.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   });
@@ -97,7 +97,7 @@ test.describe("experiencia pública", () => {
   test("donaciones explica el paso real antes de continuar", async ({ page }) => {
     await page.goto("/donaciones", { waitUntil: "domcontentloaded" });
     await expect(page.getByText("Este sitio todavía no procesa pagos en línea.")).toBeVisible();
-    const contributionLink = page.getByRole("link", { name: "Coordinar mi aporte" });
+    const contributionLink = page.getByRole("link", { name: "Donar ahora" });
     await expect(contributionLink).toHaveAttribute("href", /wa\.me/);
   });
 

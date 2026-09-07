@@ -30,6 +30,10 @@ export async function getConfiguracion() {
         .values({
           email_fundacion: "correntinosclim@gmail.com",
           telefono_fundacion: "+54 379 405 9015",
+          whatsapp_contacto: "+54 379 405 9015",
+          ubicacion_fundacion: "Corrientes, Argentina",
+          direccion_retiro: "Retiro o entrega a coordinar por WhatsApp",
+          instrucciones_pedido: "Después de enviar el pedido, coordinamos el pago y la entrega por WhatsApp.",
           texto_home: "Somos una fundación socioambiental comprometida con la acción climática.",
         })
         .returning();
@@ -44,6 +48,10 @@ export async function getConfiguracion() {
 export async function updateConfiguracion(id: string, payload: {
   email_fundacion: string;
   telefono_fundacion: string;
+  whatsapp_contacto: string;
+  ubicacion_fundacion: string;
+  direccion_retiro: string;
+  instrucciones_pedido: string;
   texto_home: string;
 }) {
   try {

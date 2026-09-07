@@ -135,7 +135,8 @@ export default async function HomePage() {
             quality={90}
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-[#071f17]/82 backdrop-blur-[1.5px]" />
+          <div className="absolute inset-0 bg-[#071f17]/34 backdrop-blur-[0.25px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
         </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>

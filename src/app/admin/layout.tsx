@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="admin-shell min-h-screen bg-gray-50">
       {/* Mobile toggle */}
       <button
         ref={menuButtonRef}
@@ -144,7 +144,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main content */}
       <main className="lg:ml-64 min-h-screen">
-        <div className="px-5 pb-10 pt-20 sm:px-7 lg:p-9">{children}</div>
+        <div className="px-5 pb-10 pt-20 sm:px-8 lg:px-10 lg:pb-12 lg:pt-10">{children}</div>
       </main>
     </div>
   );

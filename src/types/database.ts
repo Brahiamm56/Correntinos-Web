@@ -76,6 +76,10 @@ export interface Configuracion {
   id: string;
   email_fundacion: string | null;
   telefono_fundacion: string | null;
+  whatsapp_contacto: string | null;
+  ubicacion_fundacion: string | null;
+  direccion_retiro: string | null;
+  instrucciones_pedido: string | null;
   texto_home: string | null;
   actualizado_en: string;
 }

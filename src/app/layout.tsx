@@ -79,9 +79,9 @@ export default async function RootLayout({
     >
       <body className="noise-overlay min-h-full flex flex-col">
         <AuthProvider>
-          <Header />
+          <Header whatsapp={configuration.whatsapp} />
           <main className="flex-1">{children}</main>
-          <Footer email={configuration.email} phone={configuration.phone} />
+          <Footer email={configuration.email} whatsapp={configuration.whatsapp} location={configuration.location} />
         </AuthProvider>
       </body>
     </html>

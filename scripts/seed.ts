@@ -41,6 +41,10 @@ async function seed() {
     await db.insert(schema.configuracion).values({
       email_fundacion: "correntinosclim@gmail.com",
       telefono_fundacion: "+54 379 405 9015",
+      whatsapp_contacto: "+54 379 405 9015",
+      ubicacion_fundacion: "Corrientes, Argentina",
+      direccion_retiro: "Retiro o entrega a coordinar por WhatsApp",
+      instrucciones_pedido: "Después de enviar el pedido, coordinamos el pago y la entrega por WhatsApp.",
       texto_home: "Somos una fundación socioambiental comprometida con la acción climática en la provincia de Corrientes, Argentina.",
     });
     console.log("✓ Configuración del sitio inicializada.");

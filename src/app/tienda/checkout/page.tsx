@@ -20,8 +20,18 @@ export default function CheckoutPage() {
     cliente_ciudad: "",
   });
   const [wantsShipping, setWantsShipping] = useState(false);
+  const [siteConfig, setSiteConfig] = useState({ pickupAddress: "", orderInstructions: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/configuracion")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (data) setSiteConfig({ pickupAddress: data.pickupAddress || "", orderInstructions: data.orderInstructions || "" });
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     if (!profile) return;
@@ -76,7 +86,11 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      router.push(`/tienda/exito?orden=${data.numero_orden}`);
+      if (data.whatsapp_url) {
+        window.location.assign(data.whatsapp_url);
+      } else {
+        router.push(`/tienda/exito?orden=${data.numero_orden}`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error inesperado");
       setLoading(false);
@@ -99,7 +113,7 @@ export default function CheckoutPage() {
           <p className="section-label">Pedido invitado</p>
           <h1 className="text-3xl">Finalizá tu pedido</h1>
           <p className="mt-3 max-w-2xl text-[var(--gris-calido)]">
-            No necesitás iniciar sesión. Dejanos tus datos para coordinar el pago y la entrega.
+            No necesitás iniciar sesión. Dejanos tus datos y enviaremos el pedido por WhatsApp para coordinar el pago y la entrega.
           </p>
         </div>
 
@@ -164,7 +178,7 @@ export default function CheckoutPage() {
                     <span>
                       Quiero coordinar envío
                       <span className="mt-1 block font-normal leading-relaxed text-[var(--gris-calido)]">
-                        Si no lo marcás, el equipo coordina retiro o entrega por mensaje.
+                        Si no lo marcás, el equipo coordina retiro o entrega por WhatsApp{siteConfig.pickupAddress ? ` · ${siteConfig.pickupAddress}` : ""}.
                       </span>
                     </span>
                   </label>
@@ -208,7 +222,7 @@ export default function CheckoutPage() {
                 {!wantsShipping && (
                   <p className="flex items-start gap-2 border-l-2 border-[var(--dorado)] bg-white px-4 py-3 text-sm leading-relaxed text-[var(--gris-calido)]">
                     <Truck size={18} className="mt-0.5 shrink-0 text-[var(--verde-hoja)]" />
-                    El envío o retiro se coordina después de registrar el pedido.
+                    El pedido se registra y se abre WhatsApp para coordinar el pago y la entrega. {siteConfig.pickupAddress}
                   </p>
                 )}
               </div>
@@ -223,8 +237,9 @@ export default function CheckoutPage() {
               disabled={loading}
               className="btn-primary w-full justify-center text-base py-4 disabled:opacity-50"
             >
-              {loading ? "Registrando pedido..." : `Confirmar pedido — $${getTotal().toLocaleString("es-AR")}`}
+              {loading ? "Preparando WhatsApp..." : `Enviar pedido por WhatsApp — $${getTotal().toLocaleString("es-AR")}`}
             </button>
+            {siteConfig.orderInstructions && <p className="text-xs leading-relaxed text-[var(--gris-calido)]">{siteConfig.orderInstructions}</p>}
           </form>
 
           <div>

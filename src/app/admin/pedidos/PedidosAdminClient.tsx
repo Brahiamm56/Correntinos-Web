@@ -63,7 +63,7 @@ export default function PedidosAdminClient({ ordenes }: Props) {
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-300 pb-6">
-        <div><p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">Tienda</p><h1 className="mt-2 text-3xl font-bold text-gray-950">Pedidos</h1><p className="mt-1 text-sm text-gray-500">{ordenes.length} pedidos registrados</p></div>
+        <div><p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500">Tienda</p><h1 className="mt-2 text-3xl font-bold text-gray-950">Pedidos</h1><p className="mt-1 text-sm text-gray-500">{ordenes.length} pedidos registrados · Se coordinan por WhatsApp</p></div>
         <button
           onClick={exportCSV}
           className="inline-flex min-h-11 items-center gap-2 border-b border-gray-500 px-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-950 hover:text-gray-950"

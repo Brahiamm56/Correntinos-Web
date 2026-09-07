@@ -8,5 +8,5 @@ export const metadata = {
 
 export default async function DonacionesPage() {
   const configuration = await getPublicConfiguration();
-  return <DonacionesClient email={configuration.email} phone={configuration.phone} />;
+  return <DonacionesClient email={configuration.email} phone={configuration.phone} whatsapp={configuration.whatsapp} />;
 }

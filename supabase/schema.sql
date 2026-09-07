@@ -71,13 +71,26 @@ CREATE TABLE IF NOT EXISTS configuracion (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   singleton_key BOOLEAN NOT NULL DEFAULT TRUE,
   email_fundacion VARCHAR(255),
-  telefono_fundacion VARCHAR(20),
+  telefono_fundacion VARCHAR(40),
+  whatsapp_contacto VARCHAR(40),
+  ubicacion_fundacion VARCHAR(255),
+  direccion_retiro VARCHAR(500),
+  instrucciones_pedido TEXT,
   texto_home TEXT,
   actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 ALTER TABLE configuracion
   ADD COLUMN IF NOT EXISTS singleton_key BOOLEAN NOT NULL DEFAULT TRUE;
+
+ALTER TABLE configuracion
+  ALTER COLUMN telefono_fundacion TYPE VARCHAR(40);
+
+ALTER TABLE configuracion
+  ADD COLUMN IF NOT EXISTS whatsapp_contacto VARCHAR(40),
+  ADD COLUMN IF NOT EXISTS ubicacion_fundacion VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS direccion_retiro VARCHAR(500),
+  ADD COLUMN IF NOT EXISTS instrucciones_pedido TEXT;
 
 ALTER TABLE productos
   ADD COLUMN IF NOT EXISTS variantes JSONB DEFAULT '[]'::JSONB;
@@ -383,11 +396,24 @@ CREATE POLICY "Owner can delete"
   TO authenticated
   USING (bucket_id = 'media' AND auth.uid() = owner);
 
-INSERT INTO configuracion (singleton_key, email_fundacion, telefono_fundacion, texto_home)
+INSERT INTO configuracion (
+  singleton_key,
+  email_fundacion,
+  telefono_fundacion,
+  whatsapp_contacto,
+  ubicacion_fundacion,
+  direccion_retiro,
+  instrucciones_pedido,
+  texto_home
+)
 VALUES (
   TRUE,
   'correntinosclim@gmail.com',
   '+54 379 405 9015',
+  '+54 379 405 9015',
+  'Corrientes, Argentina',
+  'Retiro o entrega a coordinar por WhatsApp',
+  'Después de enviar el pedido, coordinamos el pago y la entrega por WhatsApp.',
   'Somos una fundación socioambiental comprometida con la acción climática en la provincia de Corrientes, Argentina.'
 )
 ON CONFLICT (singleton_key) DO NOTHING;

@@ -21,7 +21,7 @@ const destinations = [
   },
 ];
 
-export default function DonacionesClient({ email, phone }: { email: string; phone: string }) {
+export default function DonacionesClient({ email, phone, whatsapp }: { email: string; phone: string; whatsapp: string }) {
   const [selected, setSelected] = useState("5.000");
   const [custom, setCustom] = useState("");
   const finalAmount = selected === "Otro" ? custom.trim() : selected;
@@ -29,7 +29,7 @@ export default function DonacionesClient({ email, phone }: { email: string; phon
     ? `Hola, quiero coordinar un aporte de $${finalAmount} para la fundación.`
     : "Hola, quiero coordinar un aporte para la fundación.";
   const phoneHref = phone.replace(/[^+\d]/g, "");
-  const whatsappHref = `https://wa.me/${phoneHref.replace("+", "")}?text=${encodeURIComponent(message)}`;
+  const whatsappHref = `https://wa.me/${whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent(message)}`;
 
   return (
     <div className="min-h-screen bg-[var(--papel)] pt-[4.75rem]">
@@ -41,9 +41,11 @@ export default function DonacionesClient({ email, phone }: { email: string; phon
             fill
             sizes="100vw"
             quality={90}
+            loading="eager"
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-[#071f17]/85 backdrop-blur-[1.5px]" />
+          <div className="absolute inset-0 bg-[#071f17]/34 backdrop-blur-[0.25px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
         </div>
         <div className="section-container !py-16 sm:!py-24">
           <div className="grid gap-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:items-end">

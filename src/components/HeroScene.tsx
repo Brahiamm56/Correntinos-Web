@@ -59,7 +59,8 @@ export default function HeroScene({ intro }: { intro?: string }) {
           imageClassName="object-cover"
         />
       </div>
-      <div className="absolute inset-0 bg-[#071f17]/68" />
+      <div className="absolute inset-0 bg-[#071f17]/38" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/36 to-[#071f17]/18" />
 
       <div ref={contentRef} className="section-container relative z-10 w-full !pb-14 !pt-32 sm:!pb-20 sm:!pt-40">
         <div className="max-w-3xl">

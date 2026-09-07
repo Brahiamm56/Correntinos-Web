@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import type { ComponentType } from "react";
-import { Envelope, Instagram, MapPoint, Phone } from "reicon-react";
+import { ChatRound, Envelope, Instagram, MapPoint, Phone } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
 import { getPublicConfiguration } from "@/lib/configuracion";
 
@@ -19,8 +19,9 @@ export default async function ContactoPage() {
   const contactInfo: { Icon: IconComponent; label: string; value: string; href: string }[] = [
     { Icon: Envelope, label: "Email", value: configuration.email, href: `mailto:${configuration.email}` },
     { Icon: Phone, label: "Teléfono", value: configuration.phone, href: `tel:${phoneHref}` },
+    { Icon: ChatRound, label: "WhatsApp", value: configuration.whatsapp, href: `https://wa.me/${configuration.whatsapp.replace(/[^\d]/g, "")}` },
     { Icon: Instagram, label: "Instagram", value: "@correntinosclim", href: "https://www.instagram.com/correntinosclim/" },
-    { Icon: MapPoint, label: "Ubicación", value: "Corrientes, Argentina", href: "https://maps.google.com/?q=Corrientes,Argentina" },
+    { Icon: MapPoint, label: "Ubicación", value: configuration.location, href: `https://maps.google.com/?q=${encodeURIComponent(configuration.location)}` },
   ];
 
   return (
@@ -28,14 +29,16 @@ export default async function ContactoPage() {
       <section className="relative isolate overflow-hidden dark-section">
         <div className="absolute inset-0 -z-10">
           <Image
-            src="/hero-section/imagen-hero1.jpg"
-            alt="Contacto - Correntinos contra el cambio climático"
+            src="/contacto/contacto-fondo.jpg"
+            alt="Integrantes de Correntinos Contra el Cambio Climático"
             fill
             sizes="100vw"
             quality={90}
-            className="object-cover object-center"
+            loading="eager"
+            className="object-cover object-[center_54%]"
           />
-          <div className="absolute inset-0 bg-[#071f17]/85 backdrop-blur-[1.5px]" />
+          <div className="absolute inset-0 bg-[#071f17]/34 backdrop-blur-[0.25px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
         </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>

@@ -307,3 +307,21 @@ section[id] { scroll-margin-top: 5.5rem; }
 .rich-editor__content a { color: var(--verde-hoja); text-decoration: underline; }
 .rich-editor__content strong { font-weight: 700; }
 .rich-editor__content em { font-style: italic; }
+
+.admin-shell h1 {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 1.875rem !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.admin-shell main h2,
+.admin-shell main h3 {
+  font-family: var(--font-body), system-ui, sans-serif;
+  line-height: 1.3;
+}
+
+.admin-shell main h2 { font-size: 1.125rem !important; }
+.admin-shell main h3 { font-size: 1rem !important; }
+.admin-shell aside h2 { font-size: 0.875rem !important; line-height: 1.25; }

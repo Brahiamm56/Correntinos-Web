@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bullhorn, HandHeart, Leaf, Microscope } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
+import { getPublicConfiguration } from "@/lib/configuracion";
 
 export const metadata: Metadata = {
   title: "Trabajá con Nosotros",
@@ -39,7 +40,10 @@ const oportunidades = [
   },
 ];
 
-export default function TrabajaConNosotrosPage() {
+export default async function TrabajaConNosotrosPage() {
+  const configuration = await getPublicConfiguration();
+  const whatsappHref = configuration.whatsapp.replace(/[^\d]/g, "");
+
   return (
     <div className="pt-[4.75rem]">
       <section className="dark-section">
@@ -112,14 +116,14 @@ export default function TrabajaConNosotrosPage() {
               <div><h2>¿Conversamos?</h2><p className="mt-4 max-w-2xl text-lg text-[var(--gris-calido)]">Contanos qué te motiva, qué sabés hacer y cuánto tiempo te gustaría dedicar.</p></div>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <a
-                  href="mailto:correntinosclim@gmail.com?subject=Quiero%20sumarme%20a%20la%20fundación"
+                  href={`mailto:${configuration.email}?subject=Quiero%20sumarme%20a%20la%20fundación`}
                   className="action-primary"
                   id="apply-email-cta"
                 >
                   Envianos un email
                 </a>
                 <a
-                  href="https://wa.me/543794059015?text=Hola!%20Quiero%20sumarme%20a%20la%20fundación"
+                  href={`https://wa.me/${whatsappHref}?text=Hola!%20Quiero%20sumarme%20a%20la%20fundación`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="action-link justify-center"

@@ -8,15 +8,17 @@ const ways = ["Educación ambiental", "Trabajo territorial", "Incidencia climát
 export default function DonationBanner() {
   return (
     <section id="donar" className="relative isolate overflow-hidden warm-section border-y border-[var(--dorado)]/25">
-      <div className="absolute inset-0 -z-10 opacity-15">
+      <div className="absolute inset-0 -z-10">
         <Image
-          src="/hero-section/imagen-hero3.jpeg"
-          alt="Sostener el trabajo ambiental"
+          src="/donaciones/dona-fondo.jpg"
+          alt="Voluntariado y acción climática en Corrientes"
           fill
           sizes="100vw"
           quality={80}
-          className="object-cover"
+          className="object-cover object-[center_58%] opacity-50"
         />
+        <div className="absolute inset-0 bg-[var(--crema)]/55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--crema)]/72 via-[var(--crema)]/52 to-[var(--crema)]/34" />
       </div>
       <div className="section-container !py-14 sm:!py-20">
         <AnimatedSection>

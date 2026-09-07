@@ -62,7 +62,8 @@ export default async function NoticiaPage({
               priority
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-[#071f17]/72" />
+            <div className="absolute inset-0 bg-[#071f17]/34" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
           </>
         ) : (
           <div className="absolute inset-0 bg-[var(--verde-profundo)]" />

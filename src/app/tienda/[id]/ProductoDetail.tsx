@@ -125,8 +125,12 @@ export default function ProductoDetail({ producto }: Props) {
         throw new Error(data.error || "Error al crear la orden");
       }
 
-      router.push(`/tienda/exito?orden=${data.numero_orden}`);
-      router.refresh();
+      if (data.whatsapp_url) {
+        window.location.assign(data.whatsapp_url);
+      } else {
+        router.push(`/tienda/exito?orden=${data.numero_orden}`);
+        router.refresh();
+      }
     } catch (error) {
       setOrderError(error instanceof Error ? error.message : "Error inesperado");
       setOrderLoading(false);
@@ -244,7 +248,7 @@ export default function ProductoDetail({ producto }: Props) {
                 </p>
                 <h2 className="text-2xl mb-2">Finalizá tu pedido desde este producto</h2>
                 <p className="text-sm text-[var(--gris-calido)] max-w-2xl">
-                  No necesitás iniciar sesión. Completá tus datos para registrar el pedido sin pasar por el carrito.
+                  No necesitás iniciar sesión. Completá tus datos para registrar el pedido y enviarlo por WhatsApp.
                 </p>
               </div>
 
@@ -367,7 +371,7 @@ export default function ProductoDetail({ producto }: Props) {
                   disabled={orderLoading}
                   className="btn-primary justify-center disabled:opacity-50"
                 >
-                  {orderLoading ? "Registrando pedido..." : `Confirmar pedido por $${total.toLocaleString("es-AR")}`}
+                  {orderLoading ? "Preparando WhatsApp..." : `Enviar pedido por WhatsApp · $${total.toLocaleString("es-AR")}`}
                 </button>
 
                 <button
