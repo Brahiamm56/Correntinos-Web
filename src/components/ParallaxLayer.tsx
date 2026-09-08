@@ -36,7 +36,7 @@ export default function ParallaxLayer({
 
     // Only animate on desktop with no reduced-motion preference
     mm.add(
-      "(prefers-reduced-motion: no-preference) and (min-width: 768px)",
+      "(min-width: 768px)",
       () => {
         const tween = gsap.fromTo(
           el,

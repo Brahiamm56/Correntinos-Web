@@ -43,7 +43,7 @@ export default function ImpactSection() {
     registerGsap();
     const ctx = gsap.context(() => {
       const media = gsap.matchMedia();
-      media.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+      media.add("(min-width: 768px)", () => {
         const cards = cardsRef.current?.querySelectorAll<HTMLElement>("[data-impact-card]");
         cards?.forEach((card) => {
           const photo = card.querySelector<HTMLElement>("[data-impact-photo]");

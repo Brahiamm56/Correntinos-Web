@@ -15,6 +15,7 @@ import HeroScene from "@/components/HeroScene";
 import ImpactSection from "@/components/ImpactSection";
 import ProductsCarousel from "@/components/ProductsCarousel";
 import StatsCounter from "@/components/StatsCounter";
+import TrustMarquee from "@/components/TrustMarquee";
 import { db } from "@/db";
 import { categorias, productos } from "@/db/schema";
 import { getNoticiaExcerpt, getPublishedNoticias } from "@/lib/noticias";
@@ -111,16 +112,14 @@ export default async function HomePage() {
         <div className="section-container !py-0">
           <div className="trust-bridge-inner">
             <div className="trust-side trust-side-left" aria-hidden="true">
-              <div className="trust-marquee">
-                <div className="trust-marquee-track">
-                  {[...trustSignals.slice(1), ...trustSignals.slice(1)].map((signal, index) => (
-                    <div key={`left-${signal.label}-${index}`} className="trust-marquee-item">
-                      <p>{signal.value}</p>
-                      <span>{signal.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TrustMarquee>
+                {[...trustSignals.slice(1), ...trustSignals.slice(1)].map((signal, index) => (
+                  <div key={`left-${signal.label}-${index}`} className="trust-marquee-item">
+                    <p>{signal.value}</p>
+                    <span>{signal.label}</span>
+                  </div>
+                ))}
+              </TrustMarquee>
             </div>
 
             <div className="trust-central">
@@ -129,16 +128,14 @@ export default async function HomePage() {
             </div>
 
             <div className="trust-side trust-side-right" aria-hidden="true">
-              <div className="trust-marquee">
-                <div className="trust-marquee-track">
-                  {[...trustSignals.slice(1).reverse(), ...trustSignals.slice(1).reverse()].map((signal, index) => (
-                    <div key={`right-${signal.label}-${index}`} className="trust-marquee-item">
-                      <p>{signal.value}</p>
-                      <span>{signal.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TrustMarquee reverse>
+                {[...trustSignals.slice(1).reverse(), ...trustSignals.slice(1).reverse()].map((signal, index) => (
+                  <div key={`right-${signal.label}-${index}`} className="trust-marquee-item">
+                    <p>{signal.value}</p>
+                    <span>{signal.label}</span>
+                  </div>
+                ))}
+              </TrustMarquee>
             </div>
           </div>
         </div>

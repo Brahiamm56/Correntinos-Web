@@ -11,19 +11,15 @@ export default function PublicTemplate({ children }: { children: ReactNode }) {
     const element = ref.current;
     if (!element) return;
 
-    const media = gsap.matchMedia();
-    media.add("(prefers-reduced-motion: no-preference)", () => {
+    const context = gsap.context(() => {
       gsap.fromTo(
         element,
         { y: 12, scale: 0.992, filter: "blur(5px)" },
         { y: 0, scale: 1, filter: "blur(0px)", duration: 0.62, ease: "power2.out", clearProps: "transform,filter" },
       );
-    });
-    media.add("(prefers-reduced-motion: reduce)", () => {
-      gsap.set(element, { clearProps: "all" });
-    });
+    }, ref);
 
-    return () => media.revert();
+    return () => context.revert();
   }, []);
 
   return <div ref={ref} className="route-template">{children}</div>;

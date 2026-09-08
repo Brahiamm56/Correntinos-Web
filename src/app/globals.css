@@ -301,13 +301,6 @@ section[id] { scroll-margin-top: 5.5rem; }
   .crossfade-image-layer:first-child {
     opacity: 1;
   }
-  .hero-image-layer {
-    opacity: 0;
-    transform: none !important;
-  }
-  .hero-image-layer:first-child {
-    opacity: 1;
-  }
 }
 
 ::selection { background: var(--verde-menta); color: var(--verde-profundo); }

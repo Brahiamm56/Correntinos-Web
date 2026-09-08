@@ -19,32 +19,24 @@ export default function AnimatedSection({ children, className = "", delay = 0, d
     if (!element) return;
 
     const context = gsap.context(() => {
-      const media = gsap.matchMedia();
-
-      media.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.fromTo(
-          element,
-          { y: distance, scale: 0.985, filter: "blur(7px)", willChange: "transform, filter" },
-          {
-            y: 0,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: 0.78,
-            delay: delay / 1000,
-            ease: "power3.out",
-            clearProps: "willChange",
-            scrollTrigger: {
-              trigger: element,
-              start: "top 88%",
-              once: true,
-            },
+      gsap.fromTo(
+        element,
+        { y: distance, scale: 0.985, filter: "blur(7px)", willChange: "transform, filter" },
+        {
+          y: 0,
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 0.78,
+          delay: delay / 1000,
+          ease: "power3.out",
+          clearProps: "willChange",
+          scrollTrigger: {
+            trigger: element,
+            start: "top 88%",
+            once: true,
           },
-        );
-      });
-
-      media.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(element, { clearProps: "all" });
-      });
+        },
+      );
     }, ref);
 
     return () => context.revert();

@@ -28,27 +28,19 @@ export default function HeroImageCarousel({ images, sizes }: HeroImageCarouselPr
       const layers = layerRefs.current.filter((layer): layer is HTMLImageElement => Boolean(layer));
       if (!layers.length) return;
 
-      const media = gsap.matchMedia();
-      media.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set(layers, { autoAlpha: 0, scale: 1.04 });
-        gsap.set(layers[0], { autoAlpha: 1, scale: 1 });
+      gsap.set(layers, { autoAlpha: 0, scale: 1.04 });
+      gsap.set(layers[0], { autoAlpha: 1, scale: 1 });
 
-        const timeline = gsap.timeline({ repeat: -1 });
-        layers.forEach((current, index) => {
-          const next = layers[(index + 1) % layers.length];
-          timeline
-            .to({}, { duration: HOLD_SECONDS })
-            .to(current, { autoAlpha: 0, scale: 1.015, duration: FADE_SECONDS, ease: "power2.inOut" })
-            .to(next, { autoAlpha: 1, scale: 1, duration: FADE_SECONDS, ease: "power2.inOut" }, "<");
-        });
-
-        return () => timeline.kill();
+      const timeline = gsap.timeline({ repeat: -1 });
+      layers.forEach((current, index) => {
+        const next = layers[(index + 1) % layers.length];
+        timeline
+          .to({}, { duration: HOLD_SECONDS })
+          .to(current, { autoAlpha: 0, scale: 1.015, duration: FADE_SECONDS, ease: "power2.inOut" })
+          .to(next, { autoAlpha: 1, scale: 1, duration: FADE_SECONDS, ease: "power2.inOut" }, "<");
       });
 
-      media.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(layers, { autoAlpha: 0, clearProps: "transform" });
-        gsap.set(layers[0], { autoAlpha: 1 });
-      });
+      return () => timeline.kill();
     }, containerRef);
 
     return () => context.revert();

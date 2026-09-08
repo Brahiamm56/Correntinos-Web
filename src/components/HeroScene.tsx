@@ -23,7 +23,7 @@ export default function HeroScene({ intro }: { intro?: string }) {
     registerGsap();
     const ctx = gsap.context(() => {
       const media = gsap.matchMedia();
-      media.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+      media.add("(min-width: 768px)", () => {
         gsap.to(imageRef.current, {
           yPercent: 8,
           scale: 1.03,
