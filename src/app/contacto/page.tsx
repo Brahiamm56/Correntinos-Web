@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { ComponentType } from "react";
 import { ArrowRight, ChatRound, Envelope, Instagram, MapPoint, Phone } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
+import CorrientesMap from "@/components/CorrientesMap";
 import { getPublicConfiguration } from "@/lib/configuracion";
 
 export const metadata: Metadata = {
@@ -75,6 +76,23 @@ export default async function ContactoPage() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      <section className="border-b border-[var(--border)] bg-[var(--papel)]">
+        <div className="section-container !py-16 sm:!py-24">
+          <AnimatedSection>
+            <div className="mb-10 max-w-2xl">
+              <span className="section-label text-[var(--verde-hoja)]">Nuestro territorio</span>
+              <h2 className="section-title">La acción climática empieza en Corrientes.</h2>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--gris-medio)]">
+                Conocé el lugar desde donde tejemos alianzas y convertimos el compromiso ambiental en acciones concretas.
+              </p>
+            </div>
+          </AnimatedSection>
+          <AnimatedSection delay={100} distance={28}>
+            <CorrientesMap />
+          </AnimatedSection>
         </div>
       </section>
     </div>

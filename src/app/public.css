@@ -167,6 +167,43 @@
 .public-site .footer-links li { margin: 0; }
 .public-site .site-footer .icon-button { color: white; border: 1px solid #ffffff30; }
 .public-site .site-footer .icon-button:hover { background: #ffffff15; }
+.public-site .motion-item { --motion-delay: 0ms; --motion-distance: 22px; }
+.motion-observer-ready .public-site .motion-item:not(.is-visible) { opacity: 0; transform: translateY(var(--motion-distance)); }
+.public-site .motion-item.is-visible { animation: sectionReveal 720ms cubic-bezier(.22, 1, .36, 1) var(--motion-delay) both; }
+.public-site .route-template { animation: routeEnter 420ms cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes sectionReveal {
+  from { opacity: 0; transform: translateY(var(--motion-distance)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes routeEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes routeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+::view-transition-old(root) { animation: routeOut 180ms ease both; }
+::view-transition-new(root) { animation: routeEnter 420ms cubic-bezier(.22, 1, .36, 1) both; }
+.public-site .map-shell { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(17rem, 0.8fr); gap: clamp(1rem, 3vw, 2rem); align-items: stretch; }
+.public-site .map-stage { position: relative; min-height: 30rem; overflow: hidden; border: 1px solid var(--border); border-radius: 1.25rem; background: linear-gradient(145deg, #f6f9ed, #e9f1e4); }
+.public-site .argentina-map { display: block; width: 100%; height: 100%; min-height: 30rem; }
+.public-site .map-path { fill: #d8e8d5; stroke: #a4bea0; stroke-width: 1.25; vector-effect: non-scaling-stroke; transition: fill 180ms ease, stroke 180ms ease, opacity 180ms ease; }
+.public-site .map-path:hover, .public-site .map-path:focus-visible { fill: #b9d9b4; stroke: var(--verde-hoja); outline: none; }
+.public-site .map-path.corrientes { fill: var(--verde-hoja); stroke: var(--verde-profundo); stroke-width: 2.4; filter: drop-shadow(0 5px 7px #143f3238); }
+.public-site .map-marker { fill: var(--dorado); stroke: var(--verde-profundo); stroke-width: 2; vector-effect: non-scaling-stroke; animation: markerPulse 2.4s ease-in-out infinite; }
+.public-site .map-label { fill: var(--verde-profundo); font-family: var(--font-body), sans-serif; font-size: 18px; font-weight: 700; paint-order: stroke; stroke: #f6f9ed; stroke-width: 6px; stroke-linejoin: round; }
+@keyframes markerPulse { 0%, 100% { r: 9; opacity: 1; } 50% { r: 12; opacity: .72; } }
+.public-site .map-controls { position: absolute; top: 1rem; right: 1rem; display: grid; gap: 0.5rem; }
+.public-site .map-control { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border: 1px solid var(--border-strong); border-radius: 0.75rem; background: #ffffffea; color: var(--verde-profundo); box-shadow: 0 6px 18px #143f3212; transition: background-color 180ms, transform 180ms; }
+.public-site .map-control:hover:not(:disabled) { background: white; transform: translateY(-2px); }
+.public-site .map-control:disabled { opacity: .4; }
+.public-site .map-info { display: flex; flex-direction: column; justify-content: center; border: 1px solid var(--border); border-radius: 1.25rem; background: white; padding: clamp(1.4rem, 3vw, 2.2rem); }
+.public-site .map-info h3 { margin-top: 0.7rem; font-family: var(--font-heading), serif; font-size: clamp(2rem, 4vw, 3rem); color: var(--verde-profundo); }
+.public-site .map-info p { margin-top: 1rem; color: var(--gris-medio); line-height: 1.7; }
+.public-site .map-info .tag { margin-bottom: 0.25rem; }
+.public-site .map-link { display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; margin-top: 1.5rem; color: var(--verde-hoja); font-weight: 700; }
+.public-site .map-link:hover { color: var(--verde-profundo); }
 @media (min-width: 1024px) {
   .public-site .stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
@@ -202,4 +239,13 @@
   .public-site .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1rem; }
   .public-site .footer-brand { grid-column: 1 / -1; }
   .public-site .prose { font-size: 1.05rem; line-height: 1.8; }
+  .public-site .map-shell { grid-template-columns: minmax(0, 1fr); }
+  .public-site .map-stage, .public-site .argentina-map { min-height: 25rem; }
+  .public-site .map-info { min-height: 15rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-observer-ready .public-site .motion-item:not(.is-visible) { opacity: 1; transform: none; }
+  .public-site .motion-item.is-visible, .public-site .route-template { animation: none; }
+  .public-site .map-marker { animation: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
