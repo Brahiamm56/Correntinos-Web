@@ -11,9 +11,13 @@ const publicRoutes = [
   "/tienda",
   "/auth/login",
   "/auth/register",
+  "/tienda/carrito",
+  "/tienda/checkout",
+  "/tienda/exito",
 ];
 
 const viewports = [
+  { width: 320, height: 740 },
   { width: 390, height: 844 },
   { width: 768, height: 1024 },
   { width: 1440, height: 900 },
@@ -28,6 +32,7 @@ test.describe("experiencia pública", () => {
       expect((await page.title()).trim().length).toBeGreaterThan(0);
       for (const viewport of viewports) {
         await page.setViewportSize(viewport);
+        await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
         const dimensions = await page.evaluate(() => ({
           scrollWidth: document.documentElement.scrollWidth,
           viewportWidth: window.innerWidth,
@@ -85,6 +90,70 @@ test.describe("experiencia pública", () => {
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
     expect(await toggle.evaluate((element) => document.activeElement === element)).toBeTruthy();
+  });
+
+  test("el menú móvil permite entrar a la cuenta y cierra al elegir la ruta actual", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 740 });
+    await page.goto("/", { waitUntil: "networkidle" });
+    await expect(page.getByRole("link", { name: "Ver carrito", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("link", { name: "Ingresar a mi cuenta" })).toHaveAttribute("href", "/auth/login");
+    await expect(page.locator("#contenido")).toHaveAttribute("inert", "");
+    await dialog.getByRole("link", { name: "Inicio", exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(page.locator("#contenido")).not.toHaveAttribute("inert", "");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(dialog).toHaveCount(0);
+    await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+  });
+
+  test("los montos de donación se eligen con teclado y actualizan el mensaje", async ({ page }) => {
+    await page.goto("/donaciones", { waitUntil: "networkidle" });
+    await page.getByRole("radio", { name: /\$5\.000$/ }).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("radio", { name: /10.000/ })).toBeChecked();
+    const link = page.getByRole("link", { name: "Donar ahora" });
+    expect(decodeURIComponent(await link.getAttribute("href") ?? "")).toContain("$10.000");
+    await page.getByRole("textbox", { name: "Otro monto" }).fill("3500");
+    expect(decodeURIComponent(await link.getAttribute("href") ?? "")).toContain("$3500");
+    await expect(page.getByRole("radio", { name: /10.000/ })).not.toBeChecked();
+  });
+
+  test("la contraseña puede mostrarse sin enviar el formulario", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of ["/auth/login", "/auth/register"]) {
+      await page.goto(route, { waitUntil: "networkidle" });
+      const password = page.locator("#password");
+      await password.fill("UnaClaveDePrueba");
+      await expect(password).toHaveCSS("font-size", "16px");
+      await page.getByRole("button", { name: "Mostrar contraseña" }).click();
+      await expect(password).toHaveAttribute("type", "text");
+      await page.getByRole("button", { name: "Ocultar contraseña" }).click();
+      await expect(password).toHaveAttribute("type", "password");
+      await expect(password).toHaveValue("UnaClaveDePrueba");
+    }
+  });
+
+  test("el carrito con nombres largos permite editar cantidades en un teléfono pequeño", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 740 });
+    await page.addInitScript(() => localStorage.setItem("correntinos-cart", JSON.stringify([
+      { id: "prueba-diseno", nombre: "Bolsa reutilizable de algodón para acompañar la acción climática", precio: 12500, cantidad: 1, imagen_url: null, stock: 3 },
+    ])));
+    await page.goto("/tienda/carrito", { waitUntil: "networkidle" });
+    const increase = page.getByRole("button", { name: /Aumentar cantidad/ });
+    const bounds = await increase.boundingBox();
+    expect(bounds?.width).toBeGreaterThanOrEqual(44);
+    expect(bounds?.height).toBeGreaterThanOrEqual(44);
+    await increase.click();
+    await expect(page.locator(".cart-line-total")).toContainText("25.000");
+    expect(await page.locator("main").evaluate((element) => element.scrollWidth)).toBeLessThanOrEqual(320);
+    await page.getByRole("link", { name: "Continuar con el pedido" }).click();
+    await page.getByRole("checkbox", { name: /Quiero coordinar envío/ }).check();
+    await expect(page.getByLabel("Dirección de envío *", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Ciudad *", { exact: true })).toBeVisible();
+    expect(await page.locator("main").evaluate((element) => element.scrollWidth)).toBeLessThanOrEqual(320);
   });
 
   test("el contenido esencial permanece visible con movimiento reducido", async ({ page }) => {

@@ -38,7 +38,7 @@ const hitos = [
 export default function QuienesSomosPage() {
   return (
     <div className="pt-[4.75rem]">
-      <section className="relative isolate overflow-hidden dark-section">
+      <section className="page-hero relative isolate overflow-hidden dark-section">
         <div className="absolute inset-0 -z-10">
           <Image
             src="/quienes-somos/accion-local-crisis-global.jpg"
@@ -49,8 +49,7 @@ export default function QuienesSomosPage() {
             loading="eager"
             className="object-cover object-[center_52%]"
           />
-          <div className="absolute inset-0 bg-[#071f17]/34 backdrop-blur-[0.25px]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
+          <div className="photo-shade absolute inset-0" />
         </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
@@ -68,9 +67,9 @@ export default function QuienesSomosPage() {
       </section>
 
       <section className="bg-white">
-        <div className="section-container grid gap-0 !py-16 md:grid-cols-2 sm:!py-20">
+        <div className="section-container grid gap-5 !py-12 md:grid-cols-2 sm:!py-16">
           <AnimatedSection>
-            <article className="border-y border-[var(--border-strong)] py-8 md:pr-10">
+            <article className="surface-card h-full">
               <Target size={28} className="text-[var(--verde-hoja)]" />
               <h2 className="mt-6 text-3xl">Misión</h2>
               <p className="mt-4 leading-relaxed text-[var(--gris-calido)]">
@@ -79,8 +78,8 @@ export default function QuienesSomosPage() {
             </article>
           </AnimatedSection>
           <AnimatedSection delay={120}>
-            <article className="border-b border-[var(--border-strong)] py-8 md:border-l md:border-t md:pl-10">
-              <Eye size={28} className="text-[var(--dorado)]" />
+            <article className="surface-card h-full">
+              <Eye size={28} className="text-[var(--verde-hoja)]" />
               <h2 className="mt-6 text-3xl">Visión</h2>
               <p className="mt-4 leading-relaxed text-[var(--gris-calido)]">
                 Ser una referencia en acción climática en el Nordeste argentino y acompañar una transición que proteja tanto al ambiente como a las comunidades que lo habitan.
@@ -137,7 +136,7 @@ export default function QuienesSomosPage() {
                         <p className="font-sans text-sm font-bold leading-tight text-[var(--verde-profundo)] sm:text-base">
                           {miembro.nombre}
                         </p>
-                        <span className="mt-1.5 inline-block text-[11px] font-extrabold uppercase tracking-[0.08em] text-[var(--verde-hoja)]">
+                        <span className="tag mt-2">
                           {miembro.rol}
                         </span>
                       </div>
@@ -172,7 +171,7 @@ export default function QuienesSomosPage() {
           <div className="mx-auto max-w-4xl border-t border-[var(--verde-profundo)]">
             {hitos.map((hito, i) => (
               <AnimatedSection key={`${hito.year}-${hito.title}`} delay={Math.min(i * 70, 280)}>
-                <article className="grid gap-3 border-b border-[var(--border-strong)] py-7 sm:grid-cols-[5rem_minmax(12rem,0.6fr)_minmax(0,1.4fr)] sm:gap-7">
+                <article className="grid gap-3 border-b border-[var(--border)] py-7 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-6 lg:grid-cols-[4rem_minmax(10rem,0.6fr)_minmax(0,1.4fr)]">
                   <p className="font-extrabold text-[var(--verde-hoja)]">{hito.year}</p>
                   <h3 className="!text-xl">{hito.title}</h3>
                   <p className="text-sm leading-relaxed text-[var(--gris-calido)]">{hito.text}</p>

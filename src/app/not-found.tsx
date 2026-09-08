@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <section className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[var(--verde-profundo)]">
+    <section className="relative flex min-h-[85svh] pt-[4.75rem] items-center justify-center overflow-hidden bg-[var(--verde-profundo)]">
 
       <div className="section-container relative z-10 text-center max-w-2xl mx-auto">
         <p
@@ -18,11 +18,10 @@ export default function NotFound() {
             Página no encontrada
           </span>
           <h1 className="!text-white !text-3xl sm:!text-4xl mb-5">
-            Este camino no lleva a ningún lugar
+            Este camino cambió.
           </h1>
           <p className="text-white/60 text-lg mb-10 max-w-md mx-auto">
-            La página que buscás no existe o fue movida. Pero el planeta sí nos necesita —
-            volvé al inicio y seguí navegando.
+            La página que buscás no está disponible. Volvé al inicio o encontrá las últimas novedades de nuestra comunidad.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

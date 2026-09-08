@@ -150,7 +150,7 @@ export default function ProductoDetail({ producto }: Props) {
         </div>
 
         <div className="grid md:grid-cols-2 gap-10">
-          <div className="relative aspect-square overflow-hidden bg-white">
+          <div className="relative aspect-square overflow-hidden rounded-2xl bg-white">
             {producto.imagen_url ? (
               <Image
                 src={producto.imagen_url}
@@ -172,11 +172,11 @@ export default function ProductoDetail({ producto }: Props) {
 
           <div className="border-t border-[var(--border-strong)] pt-6">
             {producto.categoria && (
-              <span className="text-xs font-semibold text-[var(--verde-claro)] uppercase tracking-wider">
+              <span className="tag">
                 {producto.categoria.nombre}
               </span>
             )}
-            <h1 className="mt-2 mb-4">{producto.nombre}</h1>
+            <h1 className="product-detail-title mt-3 mb-4">{producto.nombre}</h1>
             <p className="text-3xl font-bold text-[var(--verde-profundo)] mb-6">
               ${producto.precio.toLocaleString("es-AR")}
             </p>
@@ -194,12 +194,12 @@ export default function ProductoDetail({ producto }: Props) {
             {producto.stock > 0 && (
               <>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center border-y border-[var(--border)]">
+                  <div className="quantity-control">
                     <button
                       type="button"
                       onClick={() => setCantidad(Math.max(1, cantidad - 1))}
                       className="min-h-11 px-3 transition-colors hover:bg-white"
-                      aria-label="Reducir cantidad"
+                      disabled={cantidad <= 1} aria-label="Reducir cantidad"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
@@ -208,14 +208,14 @@ export default function ProductoDetail({ producto }: Props) {
                       type="button"
                       onClick={() => setCantidad(Math.min(producto.stock, cantidad + 1))}
                       className="min-h-11 px-3 transition-colors hover:bg-white"
-                      aria-label="Aumentar cantidad"
+                      disabled={cantidad >= producto.stock} aria-label="Aumentar cantidad"
                     >
                       <Add className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3">
+                <p role="status" className="sr-only">{added ? "Producto agregado al carrito" : ""}</p><div className="flex flex-col xl:flex-row gap-3">
                   <button
                     onClick={handleAdd}
                     className="btn-primary w-full sm:w-auto justify-center"
@@ -241,7 +241,7 @@ export default function ProductoDetail({ producto }: Props) {
             ref={checkoutRef}
             className="mt-14 grid lg:grid-cols-[1.3fr_0.7fr] gap-6 scroll-mt-32"
           >
-            <form onSubmit={handleQuickOrder} className="space-y-5 border-y border-[var(--border-strong)] py-7 sm:px-4">
+            <form onSubmit={handleQuickOrder} className="surface-card space-y-5">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--verde-hoja)]/70 mb-2">
                   Compra rápida
@@ -259,7 +259,7 @@ export default function ProductoDetail({ producto }: Props) {
                   </label>
                   <input
                     id="cliente_nombre"
-                    name="cliente_nombre"
+                    name="cliente_nombre" autoComplete="name"
                     type="text"
                     required
                     value={formData.cliente_nombre}
@@ -274,7 +274,7 @@ export default function ProductoDetail({ producto }: Props) {
                   </label>
                   <input
                     id="cliente_email"
-                    name="cliente_email"
+                    name="cliente_email" autoComplete="email"
                     type="email"
                     required
                     value={formData.cliente_email}
@@ -289,7 +289,7 @@ export default function ProductoDetail({ producto }: Props) {
                   </label>
                   <input
                     id="cliente_telefono"
-                    name="cliente_telefono"
+                    name="cliente_telefono" autoComplete="tel"
                     type="tel"
                     required
                     value={formData.cliente_telefono}
@@ -326,7 +326,7 @@ export default function ProductoDetail({ producto }: Props) {
                     </label>
                     <input
                       id="cliente_ciudad"
-                      name="cliente_ciudad"
+                      name="cliente_ciudad" autoComplete="address-level2"
                       type="text"
                       required={wantsShipping}
                       value={formData.cliente_ciudad}
@@ -342,7 +342,7 @@ export default function ProductoDetail({ producto }: Props) {
                     </label>
                     <input
                       id="cliente_direccion"
-                      name="cliente_direccion"
+                      name="cliente_direccion" autoComplete="street-address"
                       type="text"
                       required={wantsShipping}
                       value={formData.cliente_direccion}
@@ -384,7 +384,7 @@ export default function ProductoDetail({ producto }: Props) {
               </div>
             </form>
 
-            <aside className="h-fit border-y border-[var(--border-strong)] py-6 lg:sticky lg:top-28">
+            <aside className="order-summary h-fit lg:sticky lg:top-28">
               <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--verde-hoja)]/70 mb-3">
                 Resumen del pedido
               </p>

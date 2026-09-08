@@ -25,7 +25,7 @@ export default function DonationBanner() {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:items-end">
             <div>
               <span className="section-label"><Leaf size={16} /> Sostener el trabajo</span>
-              <h2 className="section-title max-w-4xl">Una comunidad que cuida su territorio puede cambiar su futuro.</h2>
+              <h2 className="section-title max-w-4xl">Tu apoyo hace crecer el cambio.</h2>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--gris-calido)]">
                 Cada aporte ayuda a sostener programas y equipos que trabajan de manera continua en Corrientes y el NEA.
               </p>

@@ -12,7 +12,7 @@ const impactAreas = [
     Icon: Lightbulb,
     title: "Concientización",
     description:
-      "Estamos convencidos de que para generar los cambios necesarios hacia una sociedad que cuide el ambiente, primero debemos tomar conciencia del impacto de nuestras acciones. Por eso, llevamos adelante distintos programas que buscan concientizar a la ciudadanía y promoverla como agente de cambio.",
+      "Acercamos la educación ambiental a escuelas y comunidades. Con talleres y experiencias compartidas, ayudamos a comprender el impacto de nuestras acciones y a encontrar nuevas formas de cuidar el ambiente.",
     images: [
       { src: "/Concientizacion/concientizacion.jpg", alt: "Educación ambiental y concientización", position: "50% 50%" },
       { src: "/Concientizacion/concientizacion2.png", alt: "Preparación del suelo y agroecología", position: "50% 50%" },
@@ -43,7 +43,7 @@ export default function ImpactSection() {
     registerGsap();
     const ctx = gsap.context(() => {
       const media = gsap.matchMedia();
-      media.add("(prefers-reduced-motion: no-preference)", () => {
+      media.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
         const cards = cardsRef.current?.querySelectorAll<HTMLElement>("[data-impact-card]");
         cards?.forEach((card) => {
           const photo = card.querySelector<HTMLElement>("[data-impact-photo]");
@@ -76,7 +76,7 @@ export default function ImpactSection() {
         <div className="grid gap-6 border-b border-[var(--border)] pb-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <div>
             <span className="section-label">Nuestros pilares</span>
-            <h2 className="section-title">La transformación ocurre cuando el conocimiento se vuelve acción.</h2>
+            <h2 className="section-title">Conocer. Participar. Transformar.</h2>
           </div>
           <p className="self-end text-lg leading-relaxed text-[var(--gris-calido)]">
             Construimos una agenda climática que nace en Corrientes, cuida los ecosistemas del litoral y convoca a quienes quieren participar.
@@ -91,9 +91,9 @@ export default function ImpactSection() {
               <article
                 key={area.title}
                 data-impact-card
-                className="grid gap-8 py-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] lg:items-center lg:gap-14"
+                className="grid gap-6 py-8 sm:py-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] lg:items-center lg:gap-14"
               >
-                <div className={`relative aspect-[16/10] overflow-hidden bg-[var(--verde-palido)] ${isReversed ? "lg:order-2" : ""}`}>
+                <div className={`impact-photo relative aspect-[16/10] overflow-hidden bg-[var(--verde-palido)] ${isReversed ? "lg:order-2" : ""}`}>
                   <div data-impact-photo className="absolute inset-[-7%] will-change-transform">
                     {area.images ? (
                       <CrossfadeImages
@@ -115,9 +115,9 @@ export default function ImpactSection() {
                   </div>
                 </div>
                 <div className={`max-w-xl ${isReversed ? "lg:order-1" : ""}`}>
-                  <Icon size={28} className="text-[var(--verde-hoja)]" />
-                  <h3 className="mt-6 text-3xl sm:text-4xl">{area.title}</h3>
-                  <p className="mt-5 text-base leading-relaxed text-[var(--gris-calido)] sm:text-lg">
+                  <div className="flex items-center gap-3"><span className="impact-icon"><Icon size={23} /></span><span className="section-label !mb-0">Pilar 0{index + 1}</span></div>
+                  <h3 className="mt-4 text-3xl sm:text-4xl">{area.title}</h3>
+                  <p className="mt-3 text-base leading-relaxed text-[var(--gris-calido)] sm:text-lg">
                     {area.description}
                   </p>
                 </div>

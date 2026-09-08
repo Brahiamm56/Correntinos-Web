@@ -47,9 +47,9 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+      <div className="utility-page min-h-screen bg-[var(--papel)] pt-28 pb-20">
         <div className="mx-auto max-w-lg px-[var(--section-padding-x)]">
-          <div className="border-y border-[var(--border-strong)] py-12">
+          <div className="empty-state">
             <ShoppingBag size={42} className="mb-4 text-[var(--verde-hoja)]" />
             <h1 className="text-2xl mb-4">Carrito vacío</h1>
             <p className="text-[var(--gris-calido)] mb-6">Agregá productos antes de continuar.</p>
@@ -102,7 +102,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+    <div className="utility-page min-h-screen bg-[var(--papel)] pt-28 pb-20">
       <div className="max-w-4xl mx-auto px-[var(--section-padding-x)]">
         <Link href="/tienda/carrito" className="inline-flex items-center gap-2 text-sm text-[var(--gris-calido)] hover:text-[var(--verde-profundo)] transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />
@@ -110,17 +110,17 @@ export default function CheckoutPage() {
         </Link>
 
         <div className="mb-8">
-          <p className="section-label">Pedido invitado</p>
+          <p className="section-label">Comprá sin crear una cuenta</p>
           <h1 className="text-3xl">Finalizá tu pedido</h1>
           <p className="mt-3 max-w-2xl text-[var(--gris-calido)]">
             No necesitás iniciar sesión. Dejanos tus datos y enviaremos el pedido por WhatsApp para coordinar el pago y la entrega.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
-            <div className="border-y border-[var(--border-strong)] py-6">
-              <h2 className="!text-lg font-bold mb-4">Datos del cliente</h2>
+            <div className="surface-card">
+              <h2 className="!text-xl mb-2">Tus datos</h2><p className="text-sm text-[var(--gris-calido)] mb-5">Los campos con * son obligatorios.</p>
               <div className="space-y-4">
                 <div>
                   <label htmlFor="cliente_nombre" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
@@ -128,7 +128,7 @@ export default function CheckoutPage() {
                   </label>
                   <input
                     id="cliente_nombre"
-                    name="cliente_nombre"
+                    name="cliente_nombre" autoComplete="name"
                     type="text"
                     required
                     value={formData.cliente_nombre}
@@ -143,7 +143,7 @@ export default function CheckoutPage() {
                     </label>
                     <input
                       id="cliente_email"
-                      name="cliente_email"
+                      name="cliente_email" autoComplete="email"
                       type="email"
                       required
                       value={formData.cliente_email}
@@ -157,7 +157,7 @@ export default function CheckoutPage() {
                     </label>
                     <input
                       id="cliente_telefono"
-                      name="cliente_telefono"
+                      name="cliente_telefono" autoComplete="tel"
                       type="tel"
                       required
                       value={formData.cliente_telefono}
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
                       </label>
                       <input
                         id="cliente_direccion"
-                        name="cliente_direccion"
+                        name="cliente_direccion" autoComplete="street-address"
                         type="text"
                         required={wantsShipping}
                         value={formData.cliente_direccion}
@@ -207,7 +207,7 @@ export default function CheckoutPage() {
                       </label>
                       <input
                         id="cliente_ciudad"
-                        name="cliente_ciudad"
+                        name="cliente_ciudad" autoComplete="address-level2"
                         type="text"
                         required={wantsShipping}
                         value={formData.cliente_ciudad}
@@ -242,8 +242,8 @@ export default function CheckoutPage() {
             {siteConfig.orderInstructions && <p className="text-xs leading-relaxed text-[var(--gris-calido)]">{siteConfig.orderInstructions}</p>}
           </form>
 
-          <div>
-            <div className="sticky top-28 border-y border-[var(--border-strong)] py-6">
+          <div className="min-w-0">
+            <div className="order-summary lg:sticky lg:top-28">
               <h3 className="!text-lg font-bold mb-4">Tu pedido</h3>
               <div className="space-y-3 mb-4">
                 {items.map((item) => (

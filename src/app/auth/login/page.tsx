@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import PasswordField from "@/components/PasswordField";
 import { authClient } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/auth";
 
@@ -56,14 +57,14 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--papel)] px-5 pb-16 pt-32">
+    <div className="auth-page flex items-center justify-center px-5 pb-12 pt-28 sm:py-32">
       <div className="w-full max-w-md">
-        <div className="border-y border-[var(--border)] py-9 sm:px-3">
+        <div className="auth-card">
           <div className="text-center mb-8">
             <Link href="/" className="inline-block mb-4">
-              <Image src="/correntinos-logo.png" alt="Fundación Correntinos Contra el Cambio Climático" width={80} height={80} quality={95} className="h-16 w-16 object-contain" />
+              <Image src="/cccclogo.png" alt="Fundación Correntinos Contra el Cambio Climático" width={80} height={80} quality={95} className="h-12 w-12 object-contain" />
             </Link>
-            <h1 className="text-2xl mb-2">Iniciar Sesión</h1>
+            <h1 className="text-2xl mb-2">Qué bueno verte.</h1>
             <p className="text-sm text-[var(--gris-calido)]">
               Ingresá a tu cuenta para continuar
             </p>
@@ -76,7 +77,7 @@ function LoginForm() {
               </label>
               <input
                 id="email"
-                type="email"
+                type="email" autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -88,9 +89,9 @@ function LoginForm() {
               <label htmlFor="password" className="block text-sm font-semibold mb-1.5 text-[var(--gris-medio)]">
                 Contraseña
               </label>
-              <input
+              <PasswordField
                 id="password"
-                type="password"
+                autoComplete="current-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

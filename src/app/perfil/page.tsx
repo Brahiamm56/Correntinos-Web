@@ -66,9 +66,9 @@ export default function PerfilPage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+      <div className="utility-page min-h-screen bg-[var(--papel)] pt-28 pb-20">
         <div className="max-w-3xl mx-auto px-[var(--section-padding-x)]">
-          <h1 className="text-3xl mb-8">Mi Perfil</h1>
+          <h1 className="text-3xl mb-8">Mi cuenta</h1>
           <div className="border-y border-[var(--border-strong)] py-8">
             <p className="text-[var(--gris-calido)] mb-6">No se pudo cargar el perfil. Probá cerrando sesión e ingresando nuevamente.</p>
             <button onClick={handleSignOut} className="btn-secondary">
@@ -81,11 +81,11 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+    <div className="utility-page min-h-screen bg-[var(--papel)] pt-28 pb-20">
       <div className="max-w-3xl mx-auto px-[var(--section-padding-x)]">
-        <h1 className="text-3xl mb-8">Mi Perfil</h1>
+        <h1 className="text-3xl mb-8">Mi cuenta</h1>
 
-        <section className="mb-10 border-y border-[var(--border-strong)] py-8">
+        <section className="surface-card mb-10">
           <div className="flex items-center gap-4 mb-6">
             {profile.foto_perfil ? (
               <Image
@@ -96,13 +96,13 @@ export default function PerfilPage() {
                 className="rounded-full"
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-[var(--verde-palido)] flex items-center justify-center text-2xl font-bold text-[var(--verde-profundo)]">
+              <div className="w-16 h-16 shrink-0 rounded-full bg-[var(--verde-palido)] flex items-center justify-center text-2xl font-bold text-[var(--verde-profundo)]">
                 {(profile.nombre || profile.email)[0]?.toUpperCase()}
               </div>
             )}
-            <div>
+            <div className="min-w-0">
               <p className="font-bold text-lg">{profile.nombre || "Sin nombre"}</p>
-              <p className="text-sm text-[var(--gris-calido)]">{profile.email}</p>
+              <p className="break-all text-sm text-[var(--gris-calido)]">{profile.email}</p>
             </div>
           </div>
 
@@ -112,14 +112,14 @@ export default function PerfilPage() {
                 Nombre
               </label>
               <input
-                id="nombre"
+                id="nombre" autoComplete="name"
                 type="text"
                 value={nombre ?? profile.nombre ?? ""}
                 onChange={(e) => setNombre(e.target.value)}
                 className="field"
               />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
                 {saving ? "Guardando..." : "Guardar cambios"}
               </button>
@@ -131,7 +131,7 @@ export default function PerfilPage() {
 
         <h2 className="text-xl mb-4">Historial de pedidos</h2>
         {ordenes.length === 0 ? (
-          <div className="border-y border-[var(--border)] py-8">
+          <div className="empty-state">
             <p className="text-[var(--gris-calido)] mb-4">Aún no tenés pedidos.</p>
             <Link href="/tienda" className="btn-primary">
               Ir a la tienda
@@ -144,10 +144,10 @@ export default function PerfilPage() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-bold text-sm">{orden.numero_orden}</span>
                   <span
-                    className={`inline-flex items-center gap-2 border-b px-1 py-1 text-xs font-semibold ${
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
                       orden.estado === "procesado"
-                        ? "border-green-600 text-green-700"
-                        : "border-amber-500 text-amber-700"
+                        ? "bg-green-50 text-green-800"
+                        : "bg-amber-50 text-amber-800"
                     }`}
                   >
                     {orden.estado === "procesado" ? "Procesado" : "Pendiente"}

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import "./public.css";
+import PublicShell from "@/components/PublicShell";
 import AuthProvider from "@/components/AuthProvider";
 import { getPublicConfiguration } from "@/lib/configuracion";
 
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     description: "Acción climática desde Corrientes para un futuro sustentable.",
     images: [
       {
-        url: "/hero-bg.png",
+        url: "/hero-section/imagen-hero1.jpg",
         width: 1200,
         height: 630,
         alt: "Esteros del Iberá — Fundación Correntinos Contra el Cambio Climático",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/hero-bg.png"],
+    images: ["/hero-section/imagen-hero1.jpg"],
   },
   robots: {
     index: true,
@@ -79,9 +79,9 @@ export default async function RootLayout({
     >
       <body className="noise-overlay min-h-full flex flex-col">
         <AuthProvider>
-          <Header whatsapp={configuration.whatsapp} />
-          <main className="flex-1">{children}</main>
-          <Footer email={configuration.email} whatsapp={configuration.whatsapp} location={configuration.location} />
+          <PublicShell email={configuration.email} whatsapp={configuration.whatsapp} location={configuration.location}>
+            {children}
+          </PublicShell>
         </AuthProvider>
       </body>
     </html>

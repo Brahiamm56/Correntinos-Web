@@ -109,11 +109,11 @@ export default async function HomePage() {
 
       <section aria-label="Alcance de la fundación" className="border-b border-[var(--border)] bg-[var(--papel)]">
         <div className="section-container !py-0">
-          <div className="grid sm:grid-cols-3">
-            {trustSignals.map((signal, index) => (
+          <div className="trust-grid">
+            {trustSignals.map((signal) => (
               <div
                 key={signal.label}
-                className={`py-6 sm:px-7 ${index > 0 ? "border-t border-[var(--border)] sm:border-l sm:border-t-0" : ""}`}
+                className="trust-item"
               >
                 <p className="text-xl text-[var(--verde-profundo)]" style={{ fontFamily: "var(--font-heading)" }}>
                   {signal.value}
@@ -135,8 +135,7 @@ export default async function HomePage() {
             quality={90}
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-[#071f17]/34 backdrop-blur-[0.25px]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
+          <div className="photo-shade absolute inset-0" />
         </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
@@ -144,7 +143,7 @@ export default async function HomePage() {
               <div>
                 <span className="section-label !text-[var(--dorado-suave)]">Nuestra razón de ser</span>
                 <h2 className="section-title max-w-4xl !text-white">
-                  El cambio climático se siente acá. La respuesta también puede empezar acá.
+                  El cambio empieza en nuestro territorio.
                 </h2>
               </div>
               <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">
@@ -171,12 +170,12 @@ export default async function HomePage() {
               </p>
             </div>
           </AnimatedSection>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+          <div className="stats-grid">
             {stats.map((stat, index) => {
               const Icon = stat.Icon;
               return (
                 <AnimatedSection key={stat.label} delay={index * 70} className="h-full">
-                  <div className={`flex h-full flex-col py-8 sm:px-6 ${index > 0 ? "border-t border-[var(--border)] sm:border-l sm:border-t-0" : ""}`}>
+                  <div className="stat-item flex flex-col">
                     <Icon size={25} className="text-[var(--verde-hoja)]" />
                     <div className="mt-10">
                       <StatsCounter value={stat.value} suffix={stat.suffix} />
@@ -202,7 +201,7 @@ export default async function HomePage() {
             <div className="mb-10 flex flex-col justify-between gap-5 border-b border-[var(--border)] pb-7 sm:flex-row sm:items-end">
               <div>
                 <span className="section-label">Desde el territorio</span>
-                <h2 className="section-title">Historias, aprendizajes y agenda.</h2>
+                <h2 className="section-title">Historias desde el territorio.</h2>
               </div>
               <Link href="/noticias" className="action-link">
                 Ver todas las noticias <ArrowRight size={18} />
@@ -213,8 +212,8 @@ export default async function HomePage() {
           {featuredNews ? (
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
               <AnimatedSection>
-                <article className="group grid gap-6 md:grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)] md:items-end">
-                  <Link href={`/noticias/${featuredNews.id}`} className="relative block aspect-[4/3] overflow-hidden">
+                <article className="group grid gap-6">
+                  <Link href={`/noticias/${featuredNews.id}`} className="news-card-image relative block aspect-[16/10] overflow-hidden">
                     <Image
                       src={featuredNews.imagen_url ?? fallbackNewsCovers[0]}
                       alt={featuredNews.titulo}
@@ -242,7 +241,7 @@ export default async function HomePage() {
                 {latestNoticias.slice(1).map((noticia, index) => (
                   <AnimatedSection key={noticia.id} delay={index * 85}>
                     <article className="group grid grid-cols-[7rem_minmax(0,1fr)] gap-4 py-5 sm:grid-cols-[9rem_minmax(0,1fr)]">
-                      <Link href={`/noticias/${noticia.id}`} className="relative aspect-[4/3] overflow-hidden">
+                      <Link href={`/noticias/${noticia.id}`} className="news-card-image relative aspect-[4/3] overflow-hidden">
                         <Image
                           src={noticia.imagen_url ?? fallbackNewsCovers[(index + 1) % fallbackNewsCovers.length]}
                           alt={noticia.titulo}

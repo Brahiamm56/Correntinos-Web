@@ -10,7 +10,7 @@ import {
   getPublishedNoticias,
 } from "@/lib/noticias";
 
-const fallbackRelatedCovers = ["/hero-bg.png", "/education-bg.png", "/research-bg.png"];
+const fallbackRelatedCovers = ["/hero-section/imagen-hero1.jpg", "/hero-section/imagen-hero2.jpg", "/hero-section/imagen-hero3.jpeg"];
 
 export async function generateMetadata({
   params,
@@ -51,7 +51,7 @@ export default async function NoticiaPage({
     <>
       <ReadingProgress />
 
-      <section className="relative pt-32 pb-16 overflow-hidden min-h-[420px] flex items-end">
+      <section className="relative mt-[4.75rem] overflow-hidden min-h-[22rem] flex items-end">
         {noticia.imagen_url ? (
           <>
             <Image
@@ -62,18 +62,17 @@ export default async function NoticiaPage({
               priority
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-[#071f17]/34" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
+            <div className="photo-shade absolute inset-0" />
           </>
         ) : (
           <div className="absolute inset-0 bg-[var(--verde-profundo)]" />
         )}
 
-        <div className="section-container relative z-10 max-w-4xl mx-auto w-full pb-2">
+        <div className="section-container relative z-10 max-w-4xl mx-auto w-full !py-12 sm:!py-16">
           <AnimatedSection>
             <Link
               href="/noticias"
-              className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors mb-8"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-white/85 hover:text-white transition-colors mb-8"
             >
               ← Volver a noticias
             </Link>
@@ -84,10 +83,10 @@ export default async function NoticiaPage({
               {noticia.titulo}
             </h1>
 
-            <div className="flex items-center gap-4 border-t border-white/25 pt-4 text-sm text-white/60 flex-wrap">
+            <div className="flex items-center gap-4 border-t border-white/25 pt-4 text-sm text-white/85 flex-wrap">
               <span>Equipo Correntinos</span>
               {noticia.fecha_publicacion && (
-                <time>
+                <time dateTime={noticia.fecha_publicacion}>
                   {new Date(noticia.fecha_publicacion).toLocaleDateString("es-AR", {
                     year: "numeric",
                     month: "long",
@@ -104,7 +103,7 @@ export default async function NoticiaPage({
         <div className="section-container max-w-3xl mx-auto">
           <AnimatedSection>
             <article
-              className="prose"
+              className="prose article-content"
               dangerouslySetInnerHTML={{ __html: noticia.contenido }}
             />
           </AnimatedSection>
@@ -133,14 +132,14 @@ export default async function NoticiaPage({
                   <AnimatedSection key={relatedNoticia.id} delay={index * 80}>
                     <Link
                       href={`/noticias/${relatedNoticia.id}`}
-                      className="group block"
+                      className="group block overflow-hidden rounded-xl"
                     >
                       <Image
                         src={cover}
                         alt={relatedNoticia.titulo}
                         width={640}
                         height={400}
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+                        className="aspect-[16/10] w-full rounded-xl object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         quality={70}
                       />
@@ -151,7 +150,7 @@ export default async function NoticiaPage({
                         <p className="text-[var(--gris-calido)] text-xs leading-relaxed line-clamp-2 mb-3">
                           {getNoticiaExcerpt(relatedNoticia.contenido, 88)}
                         </p>
-                        <span className="text-[11px] font-semibold text-[var(--verde-hoja)] group-hover:translate-x-0.5 transition-transform duration-300">
+                        <span className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--verde-hoja)] group-hover:translate-x-0.5 transition-transform duration-300">
                           Leer →
                         </span>
                       </div>

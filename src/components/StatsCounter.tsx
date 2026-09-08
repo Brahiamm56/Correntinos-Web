@@ -11,7 +11,7 @@ export default function StatsCounter({ value, suffix = "" }: StatsCounterProps) 
         style={{ fontFamily: "var(--font-heading)" }}
       >
         {value}
-        <span className="text-[var(--dorado)]">{suffix}</span>
+        <span className="text-[var(--verde-hoja)]">{suffix}</span>
       </span>
     </div>
   );

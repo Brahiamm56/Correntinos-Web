@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import type { ComponentType } from "react";
-import { ChatRound, Envelope, Instagram, MapPoint, Phone } from "reicon-react";
+import { ArrowRight, ChatRound, Envelope, Instagram, MapPoint, Phone } from "reicon-react";
 import AnimatedSection from "@/components/AnimatedSection";
 import { getPublicConfiguration } from "@/lib/configuracion";
 
@@ -26,7 +26,7 @@ export default async function ContactoPage() {
 
   return (
     <div className="pt-[4.75rem]">
-      <section className="relative isolate overflow-hidden dark-section">
+      <section className="page-hero relative isolate overflow-hidden dark-section">
         <div className="absolute inset-0 -z-10">
           <Image
             src="/contacto/contacto-fondo.jpg"
@@ -37,15 +37,14 @@ export default async function ContactoPage() {
             loading="eager"
             className="object-cover object-[center_54%]"
           />
-          <div className="absolute inset-0 bg-[#071f17]/34 backdrop-blur-[0.25px]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
+          <div className="photo-shade absolute inset-0" />
         </div>
         <div className="section-container !py-16 sm:!py-24">
           <AnimatedSection>
             <div className="grid gap-9 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-end">
               <div>
                 <span className="section-label !text-[var(--dorado-suave)]">Hablemos</span>
-                <h1 className="!text-white">¿Tenés una idea, una propuesta o querés involucrarte? Hablemos.</h1>
+                <h1 className="!text-white">Toda gran idea empieza con una charla.</h1>
               </div>
               <p className="border-t border-white/25 pt-6 text-lg leading-relaxed text-white/72">
                 Consultas, propuestas, prensa o ganas de sumarte: elegí el canal que te resulte más cómodo.
@@ -57,7 +56,7 @@ export default async function ContactoPage() {
 
       <section className="border-b border-[var(--border)] bg-white">
         <div className="section-container !py-16 sm:!py-20">
-          <div className="mx-auto max-w-5xl border-t border-[var(--border-strong)]">
+          <div className="contact-grid mx-auto max-w-5xl">
             {contactInfo.map((item, i) => {
               const Icon = item.Icon;
               return (
@@ -66,11 +65,11 @@ export default async function ContactoPage() {
                     href={item.href}
                     target={item.href.startsWith("http") ? "_blank" : undefined}
                     rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="group grid min-h-24 grid-cols-[2.5rem_minmax(6rem,0.5fr)_minmax(0,1.5fr)] items-center gap-4 border-b border-[var(--border)] py-5 transition-colors hover:text-[var(--verde-hoja)] sm:gap-8"
+                    className="contact-card group"
                   >
-                    <Icon size={24} className="text-[var(--verde-hoja)]" />
-                    <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[var(--gris-calido)]">{item.label}</p>
-                    <p className="break-words font-semibold text-[var(--verde-profundo)] transition-colors group-hover:text-[var(--verde-hoja)]">{item.value}</p>
+                    <span className="impact-icon !h-11 !w-11"><Icon size={23} /></span>
+                    <div className="min-w-0"><p className="contact-label">{item.label}</p><p className="font-semibold">{item.value}</p></div>
+                    <ArrowRight size={18} aria-hidden />
                   </a>
                 </AnimatedSection>
               );

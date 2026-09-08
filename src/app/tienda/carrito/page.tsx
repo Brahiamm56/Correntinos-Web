@@ -10,9 +10,9 @@ export default function CarritoPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+      <div className="utility-page min-h-screen bg-[var(--papel)] pt-28 pb-20">
         <div className="mx-auto max-w-3xl px-[var(--section-padding-x)]">
-          <div className="border-y border-[var(--border-strong)] py-12">
+          <div className="empty-state">
             <ShoppingBag size={44} className="mb-6 text-[var(--verde-hoja)]" />
             <h1 className="text-2xl mb-4">Tu carrito está vacío</h1>
             <p className="text-[var(--gris-calido)] mb-8">
@@ -29,19 +29,19 @@ export default function CarritoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+    <div className="utility-page min-h-screen bg-[var(--papel)] pt-28 pb-20">
       <div className="max-w-4xl mx-auto px-[var(--section-padding-x)]">
         <Link href="/tienda" className="inline-flex items-center gap-2 text-sm text-[var(--gris-calido)] hover:text-[var(--verde-profundo)] transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />
           Seguir comprando
         </Link>
 
-        <h1 className="text-3xl mb-8">Tu Carrito</h1>
+        <h1 className="text-3xl mb-8">Tu carrito</h1>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="border-t border-[var(--border-strong)] lg:col-span-2">
             {items.map((item) => (
-              <div key={item.id} className="flex gap-4 border-b border-[var(--border)] py-5">
+              <div key={item.id} className="cart-row">
                 <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden bg-[var(--verde-palido)]">
                   {item.imagen_url ? (
                     <Image src={item.imagen_url} alt={item.nombre} fill className="object-cover" sizes="80px" />
@@ -50,14 +50,14 @@ export default function CarritoPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <Link href={`/tienda/${item.id}`} className="font-bold text-sm hover:text-[var(--verde-hoja)] transition-colors line-clamp-1">
+                  <Link href={`/tienda/${item.id}`} className="font-bold text-sm hover:text-[var(--verde-hoja)] transition-colors line-clamp-2">
                     {item.nombre}
                   </Link>
                   <p className="text-sm font-bold text-[var(--verde-profundo)] mt-1">
                     ${item.precio.toLocaleString("es-AR")}
                   </p>
                   <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center border-y border-[var(--border)]">
+                    <div className="quantity-control">
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.cantidad - 1)}
@@ -79,14 +79,14 @@ export default function CarritoPage() {
                     </div>
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="p-1.5 text-red-500 transition-colors hover:text-red-700"
+                      className="icon-button !text-red-700"
                       aria-label={`Eliminar ${item.nombre}`}
                     >
                       <Trash className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="cart-line-total text-right">
                   <span className="font-bold text-sm">
                     ${(item.precio * item.cantidad).toLocaleString("es-AR")}
                   </span>
@@ -95,8 +95,8 @@ export default function CarritoPage() {
             ))}
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="sticky top-28 border-y border-[var(--border-strong)] py-6">
+          <div className="min-w-0 lg:col-span-1">
+            <div className="order-summary lg:sticky lg:top-28">
               <h3 className="!text-lg font-bold mb-4">Resumen</h3>
               <div className="space-y-2 mb-4">
                 {items.map((item) => (
@@ -113,7 +113,7 @@ export default function CarritoPage() {
                 </div>
               </div>
               <Link href="/tienda/checkout" className="btn-primary w-full justify-center mb-3">
-                Ir al checkout
+                Continuar con el pedido
               </Link>
               <button
                 onClick={clearCart}

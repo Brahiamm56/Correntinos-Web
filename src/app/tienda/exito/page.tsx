@@ -10,9 +10,9 @@ function ExitoContent() {
   const orden = searchParams.get("orden");
 
   return (
-    <div className="min-h-screen bg-[var(--papel)] pt-28 pb-20">
+    <div className="utility-page min-h-screen bg-[var(--papel)] pt-28 pb-20">
       <div className="mx-auto max-w-lg px-[var(--section-padding-x)]">
-        <div className="border-y border-[var(--border-strong)] py-10">
+        <div className="surface-card">
           <CheckCircle className="mb-6 h-14 w-14 text-[var(--verde-hoja)]" />
           <h1 className="text-2xl mb-3">Pedido registrado</h1>
           <p className="text-[var(--gris-calido)] mb-6">
@@ -21,10 +21,10 @@ function ExitoContent() {
           {orden && (
             <div className="mb-8 border-y border-[var(--border)] py-4">
               <p className="text-xs text-[var(--gris-calido)] mb-1">Número de orden</p>
-              <p className="font-bold text-lg text-[var(--verde-profundo)]">{orden}</p>
+              <p className="break-all font-bold text-lg text-[var(--verde-profundo)]">{orden}</p>
             </div>
           )}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col items-start gap-4">
             <Link href="/contacto" className="btn-secondary">
               Consultar por mi pedido
             </Link>

@@ -40,7 +40,7 @@ export default function TiendaClient({ productos, categorias }: Props) {
     <div className="min-h-screen bg-[var(--papel)] pt-[4.75rem]">
       <section className="border-b border-[var(--border)] bg-white">
         <div className="section-container !py-7 sm:!py-9">
-          <h1 className="sr-only">Productos</h1>
+          <div className="catalog-heading"><span className="section-label !mb-0">Tienda con propósito</span><h1>Pequeñas elecciones.<br />Un impacto compartido.</h1><p className="text-[var(--gris-calido)]">Cada compra acompaña el trabajo de nuestra fundación.</p></div>
           <div className="relative">
             <Search size={19} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--verde-hoja)]" />
             <input
@@ -48,7 +48,7 @@ export default function TiendaClient({ productos, categorias }: Props) {
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar productos"
               aria-label="Buscar productos"
-              className="h-12 w-full border-b border-[var(--border-strong)] bg-transparent pl-11 pr-4 text-sm text-[var(--verde-profundo)] transition-colors placeholder:text-[var(--gris-calido)] focus:border-[var(--verde-hoja)] focus:outline-none"
+              className="search-field !pl-11"
             />
           </div>
 
@@ -58,7 +58,7 @@ export default function TiendaClient({ productos, categorias }: Props) {
                 type="button"
                 onClick={() => setCatFilter("")}
                 aria-pressed={!catFilter}
-                className={`shrink-0 border-b px-1 py-2 text-sm font-bold transition-colors ${!catFilter ? "border-[var(--verde-profundo)] text-[var(--verde-profundo)]" : "border-transparent text-[var(--gris-medio)] hover:border-[var(--verde-hoja)] hover:text-[var(--verde-profundo)]"}`}
+                className="filter-chip"
               >
                 Todo
               </button>
@@ -68,26 +68,26 @@ export default function TiendaClient({ productos, categorias }: Props) {
                   key={category.id}
                   onClick={() => setCatFilter(category.id)}
                   aria-pressed={catFilter === category.id}
-                  className={`shrink-0 border-b px-1 py-2 text-sm font-bold transition-colors ${catFilter === category.id ? "border-[var(--verde-profundo)] text-[var(--verde-profundo)]" : "border-transparent text-[var(--gris-medio)] hover:border-[var(--verde-hoja)] hover:text-[var(--verde-profundo)]"}`}
+                  className="filter-chip"
                 >
                   {category.nombre}
                 </button>
               ))}
             </div>
-            <p className="flex shrink-0 items-center gap-2 text-xs font-bold text-[var(--gris-calido)] sm:text-sm">
-              <Filter size={17} /> {filtered.length}
+            <p role="status" className="flex shrink-0 items-center gap-2 text-xs font-bold text-[var(--gris-calido)] sm:text-sm">
+              <Filter size={17} aria-hidden /> {filtered.length}<span className="sr-only">productos encontrados</span>
             </p>
           </div>
         </div>
       </section>
 
-      <section className="section-container !pt-8 sm:!pt-10">
+      <section className="section-container !pt-8 sm:!pt-10"><p role="status" className="sr-only">{added ? "Producto agregado al carrito" : ""}</p>
         {filtered.length === 0 ? (
-          <div className="border-y border-[var(--border)] py-12">
+          <div className="empty-state">
             <div>
               <Search size={34} className="text-[var(--verde-hoja)]" />
-              <h2 className="mt-4 !text-3xl">No encontramos productos.</h2>
-              <p className="mt-2 text-[var(--gris-calido)]">Probá otra búsqueda o cambiá la categoría.</p>
+              <h2 className="mt-4 !text-3xl">{search || catFilter ? "No encontramos productos." : "Nuevos productos en camino."}</h2>
+              <p className="mt-2 text-[var(--gris-calido)]">{search || catFilter ? "Probá otra búsqueda o cambiá la categoría." : "Estamos preparando nuevos productos para acompañar la causa."}</p>{(search || catFilter) && <button type="button" className="action-link mt-4" onClick={() => { setSearch(""); setCatFilter(""); }}>Ver todos los productos</button>}
             </div>
           </div>
         ) : (
@@ -98,8 +98,8 @@ export default function TiendaClient({ productos, categorias }: Props) {
 
               return (
                 <AnimatedSection key={producto.id} delay={index * 55} className="h-full">
-                  <article className="group flex h-full flex-col">
-                    <Link href={`/tienda/${producto.id}`} className="relative block aspect-square overflow-hidden bg-[var(--verde-palido)]">
+                  <article className="product-card group flex h-full flex-col">
+                    <Link href={`/tienda/${producto.id}`} aria-label={`Ver ${producto.nombre}`} className="relative block aspect-square overflow-hidden bg-[var(--verde-palido)]">
                       {producto.imagen_url ? (
                         <Image src={producto.imagen_url} alt={producto.nombre} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
                       ) : (
@@ -107,13 +107,13 @@ export default function TiendaClient({ productos, categorias }: Props) {
                       )}
                       {producto.stock === 0 && <span className="absolute inset-0 grid place-items-center bg-[#0a2f23]/70 px-3 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-white">Agotado</span>}
                     </Link>
-                    <div className="flex flex-1 flex-col border-b border-[var(--border)] py-4">
-                      {producto.categoria && <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--verde-hoja)] sm:text-[10px]">{producto.categoria.nombre}</p>}
+                    <div className="product-card-body">
+                      {producto.categoria && <p className="tag">{producto.categoria.nombre}</p>}
                       <Link href={`/tienda/${producto.id}`}><h2 className="mt-1.5 line-clamp-2 !text-base leading-tight transition-colors group-hover:!text-[var(--verde-hoja)] sm:!text-xl">{producto.nombre}</h2></Link>
                       <p className="mt-2 text-base font-bold text-[var(--verde-profundo)] sm:text-xl">${producto.precio.toLocaleString("es-AR")}</p>
                       <div className="mt-auto flex items-center justify-between gap-2 pt-4">
-                        <span className="text-[10px] text-[var(--gris-calido)] sm:text-xs">{outOfStock ? "Sin stock" : `${producto.stock} disponible${producto.stock === 1 ? "" : "s"}`}</span>
-                        <button type="button" onClick={() => addProduct(producto)} disabled={outOfStock} className="grid h-9 w-9 shrink-0 place-items-center border border-[var(--verde-profundo)] text-[var(--verde-profundo)] transition-colors hover:bg-[var(--verde-profundo)] hover:text-white disabled:cursor-not-allowed disabled:opacity-35" aria-label={isAdded ? `${producto.nombre} agregado al carrito` : `Agregar ${producto.nombre} al carrito`} title={isAdded ? "Agregado al carrito" : "Agregar al carrito"}>
+                        <span className="text-xs text-[var(--gris-calido)]">{outOfStock ? "Sin stock" : `${producto.stock} disponible${producto.stock === 1 ? "" : "s"}`}</span>
+                        <button type="button" onClick={() => addProduct(producto)} disabled={outOfStock} className="product-add shrink-0" aria-label={isAdded ? `${producto.nombre} agregado al carrito` : `Agregar ${producto.nombre} al carrito`} title={isAdded ? "Agregado al carrito" : "Agregar al carrito"}>
                           {isAdded ? <CheckCircle size={17} /> : <Add size={18} />}
                         </button>
                       </div>

@@ -33,10 +33,10 @@ export default function DonacionesClient({ email, phone, whatsapp }: { email: st
 
   return (
     <div className="min-h-screen bg-[var(--papel)] pt-[4.75rem]">
-      <section className="relative isolate overflow-hidden dark-section">
+      <section className="page-hero relative isolate overflow-hidden dark-section">
         <div className="absolute inset-0 -z-10">
           <Image
-            src="/hero-section/imagen-hero1.jpg"
+            src="/donaciones/dona-fondo.jpg"
             alt="Donar para sostener la acción climática"
             fill
             sizes="100vw"
@@ -44,14 +44,13 @@ export default function DonacionesClient({ email, phone, whatsapp }: { email: st
             loading="eager"
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-[#071f17]/34 backdrop-blur-[0.25px]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#071f17]/68 via-[#071f17]/30 to-[#071f17]/14" />
+          <div className="photo-shade absolute inset-0" />
         </div>
         <div className="section-container !py-16 sm:!py-24">
           <div className="grid gap-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:items-end">
             <div className="max-w-3xl">
               <p className="section-label !text-[var(--dorado-suave)]">Donaciones</p>
-              <h1 className="!text-white">Doná para sostener la acción climática.</h1>
+              <h1 className="!text-white">Tu aporte se convierte en acción.</h1>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
                 Elegí un monto y coordiná tu aporte directamente con el equipo.
               </p>
@@ -63,36 +62,29 @@ export default function DonacionesClient({ email, phone, whatsapp }: { email: st
         </div>
       </section>
 
-      <section className="section-container !pb-14 !pt-9 sm:!pb-20 sm:!pt-12">
-
-        <fieldset className="mt-7 border-y border-[var(--border-strong)] py-2 sm:mt-12">
-          <legend className="sr-only">Elegí un monto de referencia</legend>
-          <div role="radiogroup" aria-label="Monto de referencia" className="grid grid-cols-2 sm:grid-cols-4">
-            {amounts.map((amount, index) => {
+      <section className="donation-panel section-container !py-12 sm:!py-16" aria-label="Coordiná tu donación">
+        <h2 className="!text-3xl">Cada aporte cuenta.</h2>
+        <p className="mt-3 mb-7 text-[var(--gris-calido)]">Elegí un monto en pesos argentinos. Al continuar, se abrirá WhatsApp para coordinarlo con nosotros.</p>
+        <fieldset>
+          <legend className="mb-3 text-sm font-semibold">Elegí un monto de referencia</legend>
+          <div className="amount-grid">
+            {amounts.map((amount) => {
               const active = selected === amount;
               return (
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  key={amount}
-                  onClick={() => {
+                <label key={amount} className="amount-option">
+                  <input
+                  type="radio"
+                  name="donation-amount"
+                  value={amount}
+                  aria-label={`Aportar $${amount}`}
+                  checked={active}
+                  onChange={() => {
                     setSelected(amount);
                     setCustom("");
                   }}
-                  className={`min-h-16 border-b px-4 py-4 text-left transition-colors sm:min-h-20 sm:border-b-0 sm:py-5 sm:text-center ${
-                    index % 2 === 1 ? "border-l border-[var(--border)]" : ""
-                  } ${
-                    index > 0 ? "sm:border-l sm:border-[var(--border)]" : ""
-                  } ${active ? "text-[var(--verde-profundo)]" : "text-[var(--gris-calido)] hover:text-[var(--verde-profundo)]"}`}
-                >
-                  <span className="block text-xs font-extrabold uppercase tracking-[0.12em]">
-                    {active ? "Seleccionado" : "Aporte"}
-                  </span>
-                  <span className="mt-1 block text-2xl" style={{ fontFamily: "var(--font-heading)" }}>
-                    ${amount}
-                  </span>
-                </button>
+                  />
+                  <span>{active ? "✓ Seleccionado" : "Aporte"}<strong>${amount}</strong></span>
+                </label>
               );
             })}
           </div>
@@ -140,9 +132,8 @@ export default function DonacionesClient({ email, phone, whatsapp }: { email: st
             <div>
               <p className="section-label !text-[var(--dorado-suave)]">Destino del apoyo</p>
               <h2 className="!text-white">Recursos para sostener trabajo de largo plazo.</h2>
-              <p className="mt-5 text-white/70">
-                El destino concreto se comunica al coordinar cada aporte. No asignamos equivalencias
-                automáticas que puedan generar expectativas difíciles de comprobar.
+              <p className="mt-5 text-white/80">
+                Tu apoyo acompaña nuestros programas. Al coordinar tu aporte, te contamos cómo se va a utilizar y respondemos todas tus dudas.
               </p>
             </div>
             <div className="divide-y divide-white/20 border-y border-white/20">
