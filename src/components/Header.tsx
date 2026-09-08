@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowRight, ChatRound, Envelope, Instagram, Menu, ShoppingCart, User, X } from "reicon-react";
 import { useAuthStore } from "@/store/auth";
 import { useCartStore } from "@/store/cart";
+import { gsap, registerGsap } from "@/lib/gsap";
 
 const navLinks = [
   { href: "/", label: "Inicio" },
@@ -38,6 +39,7 @@ export default function Header({ whatsapp, email }: { whatsapp: string; email: s
     document.body.style.overflow = "hidden";
     const background = document.querySelectorAll<HTMLElement>("#contenido, .site-footer, .site-header, .skip-link");
     background.forEach((element) => { element.inert = true; });
+    menuPanelRef.current?.querySelector<HTMLElement>("[data-menu-first]")?.focus();
     const frame = window.requestAnimationFrame(() => menuPanelRef.current?.querySelector<HTMLElement>("[data-menu-first]")?.focus());
     const desktop = window.matchMedia("(min-width: 1024px)");
     const onResize = () => { if (desktop.matches) setOpenPath(null); };
@@ -64,6 +66,17 @@ export default function Header({ whatsapp, email }: { whatsapp: string; email: s
     };
   }, [menuOpen]);
 
+  useLayoutEffect(() => {
+    if (!menuOpen || !menuPanelRef.current) return;
+    registerGsap();
+    const context = gsap.context(() => {
+      gsap.fromTo(menuPanelRef.current, { opacity: 0, yPercent: -1.5 }, { opacity: 1, yPercent: 0, duration: 0.42, ease: "power3.out" });
+      gsap.fromTo("[data-menu-item]", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.42, stagger: 0.055, delay: 0.08, ease: "power3.out" });
+      gsap.fromTo("[data-menu-action]", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.36, stagger: 0.06, delay: 0.35, ease: "power2.out" });
+    }, menuPanelRef);
+    return () => context.revert();
+  }, [menuOpen]);
+
   return <>
     <header className="site-header">
       <nav className="header-inner" aria-label="Navegación principal">
@@ -85,15 +98,15 @@ export default function Header({ whatsapp, email }: { whatsapp: string; email: s
       </nav>
     </header>
     {menuOpen && <div ref={menuPanelRef} id="mobile-navigation" role="dialog" aria-modal="true" aria-label="Navegación principal" className="mobile-menu">
-      <div className="mobile-menu-top"><span className="brand-wordmark">Correntinos<span>Una comunidad en acción</span></span><button type="button" className="icon-button" aria-label="Cerrar menú" onClick={() => { setOpenPath(null); window.requestAnimationFrame(() => menuButtonRef.current?.focus()); }}><X size={23} /></button></div>
+      <div className="mobile-menu-top"><Link href="/" className="mobile-menu-brand" aria-label="Fundación Correntinos · Ir al inicio" onClick={() => setOpenPath(null)}><Image src="/cccclogo.png" alt="" width={44} height={44} quality={95} className="mobile-menu-logo" /><span className="brand-wordmark">Correntinos<span>Una comunidad en acción</span></span></Link><button type="button" className="icon-button" aria-label="Cerrar menú" onClick={() => { setOpenPath(null); window.requestAnimationFrame(() => menuButtonRef.current?.focus()); }}><X size={23} /></button></div>
       <nav aria-label="Navegación principal móvil"><ul>
-        {navLinks.map((link, index) => <li key={link.href}><Link data-menu-first={index === 0 ? "true" : undefined} href={link.href} onClick={() => setOpenPath(null)} aria-current={isActive(link.href) ? "page" : undefined} className="mobile-nav-link">{link.label}<ArrowRight size={20} /></Link></li>)}
+        {navLinks.map((link, index) => <li key={link.href}><Link data-menu-first={index === 0 ? "true" : undefined} data-menu-item href={link.href} onClick={() => setOpenPath(null)} aria-current={isActive(link.href) ? "page" : undefined} className="mobile-nav-link"><span className="mobile-nav-index" aria-hidden="true">0{index + 1}</span><span className="mobile-nav-label">{link.label}</span><ArrowRight size={20} /></Link></li>)}
       </ul></nav>
       <div className="mobile-menu-actions">
-        <Link href="/donaciones" onClick={() => setOpenPath(null)} className="action-primary w-full">Quiero colaborar <ArrowRight size={18} /></Link>
-        <Link href="/trabaja-con-nosotros" onClick={() => setOpenPath(null)} className="action-link">Sumarme como voluntario <ArrowRight size={17} /></Link>
-        <Link href={accountHref} onClick={() => setOpenPath(null)} className="mobile-account"><User size={20} />{user ? "Mi cuenta" : "Ingresar a mi cuenta"}<ArrowRight size={17} /></Link>
-        <div className="flex gap-2">
+        <Link data-menu-action href="/donaciones" onClick={() => setOpenPath(null)} className="action-primary w-full">Quiero colaborar <ArrowRight size={18} /></Link>
+        <Link data-menu-action href="/trabaja-con-nosotros" onClick={() => setOpenPath(null)} className="action-link">Sumarme como voluntario <ArrowRight size={17} /></Link>
+        <Link data-menu-action href={accountHref} onClick={() => setOpenPath(null)} className="mobile-account"><User size={20} />{user ? "Mi cuenta" : "Ingresar a mi cuenta"}<ArrowRight size={17} /></Link>
+        <div data-menu-action className="flex gap-2">
           <a href="https://www.instagram.com/correntinosclim/" target="_blank" rel="noopener noreferrer" className="icon-button" aria-label="Instagram"><Instagram size={21} /></a>
           <a href={`https://wa.me/${whatsapp.replace(/[^\d]/g, "")}`} target="_blank" rel="noopener noreferrer" className="icon-button" aria-label="WhatsApp"><ChatRound size={21} /></a>
           <a href={`mailto:${email}`} className="icon-button" aria-label="Correo electrónico"><Envelope size={21} /></a>
