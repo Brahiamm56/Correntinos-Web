@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { gsap, registerGsap } from "@/lib/gsap";
 
 interface AnimatedSectionProps {
   children: ReactNode;
@@ -11,40 +12,46 @@ interface AnimatedSectionProps {
 
 export default function AnimatedSection({ children, className = "", delay = 0, distance = 22 }: AnimatedSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.add("motion-observer-ready");
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion || !("IntersectionObserver" in window)) {
-      window.setTimeout(() => setIsVisible(true), 0);
-      return;
-    }
-
+    registerGsap();
     const element = ref.current;
     if (!element) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setIsVisible(true);
-        observer.disconnect();
-      },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
-    );
+    const context = gsap.context(() => {
+      const media = gsap.matchMedia();
 
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
+      media.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.fromTo(
+          element,
+          { y: distance, scale: 0.985, filter: "blur(7px)", willChange: "transform, filter" },
+          {
+            y: 0,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.78,
+            delay: delay / 1000,
+            ease: "power3.out",
+            clearProps: "willChange",
+            scrollTrigger: {
+              trigger: element,
+              start: "top 88%",
+              once: true,
+            },
+          },
+        );
+      });
 
-  const motionStyle = {
-    "--motion-delay": `${delay}ms`,
-    "--motion-distance": `${distance}px`,
-  } as CSSProperties;
+      media.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(element, { clearProps: "all" });
+      });
+    }, ref);
+
+    return () => context.revert();
+  }, [delay, distance]);
 
   return (
-    <div ref={ref} className={`motion-item ${isVisible ? "is-visible" : ""} ${className}`} style={motionStyle}>
+    <div ref={ref} className={`motion-item ${className}`}>
       {children}
     </div>
   );

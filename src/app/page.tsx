@@ -107,20 +107,39 @@ export default async function HomePage() {
     <>
       <HeroScene intro={configuration.homeIntro} />
 
-      <section aria-label="Alcance de la fundación" className="border-b border-[var(--border)] bg-[var(--papel)]">
+      <section aria-label="Alcance de la fundación" className="trust-bridge">
         <div className="section-container !py-0">
-          <div className="trust-grid">
-            {trustSignals.map((signal) => (
-              <div
-                key={signal.label}
-                className="trust-item"
-              >
-                <p className="text-xl text-[var(--verde-profundo)]" style={{ fontFamily: "var(--font-heading)" }}>
-                  {signal.value}
-                </p>
-                <p className="mt-1 text-sm text-[var(--gris-calido)]">{signal.label}</p>
+          <div className="trust-bridge-inner">
+            <div className="trust-side trust-side-left" aria-hidden="true">
+              <div className="trust-marquee">
+                <div className="trust-marquee-track">
+                  {[...trustSignals.slice(1), ...trustSignals.slice(1)].map((signal, index) => (
+                    <div key={`left-${signal.label}-${index}`} className="trust-marquee-item">
+                      <p>{signal.value}</p>
+                      <span>{signal.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
+
+            <div className="trust-central">
+              <p>{trustSignals[0].value}</p>
+              <span>{trustSignals[0].label}</span>
+            </div>
+
+            <div className="trust-side trust-side-right" aria-hidden="true">
+              <div className="trust-marquee">
+                <div className="trust-marquee-track">
+                  {[...trustSignals.slice(1).reverse(), ...trustSignals.slice(1).reverse()].map((signal, index) => (
+                    <div key={`right-${signal.label}-${index}`} className="trust-marquee-item">
+                      <p>{signal.value}</p>
+                      <span>{signal.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
