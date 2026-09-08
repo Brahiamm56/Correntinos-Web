@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowDown, ArrowRight } from "reicon-react";
-import CrossfadeImages from "@/components/CrossfadeImages";
+import HeroImageCarousel, { type HeroImage } from "@/components/HeroImageCarousel";
 import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
-const communityHeroImages = [
+const communityHeroImages: HeroImage[] = [
   { src: "/hero-section/imagen-hero1.jpg", alt: "Acción ambiental comunitaria en Corrientes", position: "50% 50%" },
   { src: "/hero-section/imagen-hero2.jpg", alt: "Cumbre Climática de las Juventudes LCOY", position: "50% 50%" },
   { src: "/hero-section/imagen-hero3.jpeg", alt: "Educación ambiental y talleres participativos", position: "50% 50%" },
+  { src: "/hero-section/hero-4.jpg", alt: "Equipo de Correntinos frente a un mural comunitario", position: "50% 50%" },
   { src: "/hero-section/imagen-hero4.jpg", alt: "Comunidad en defensa del Parque Caraguatá", position: "50% 50%" },
 ];
 
@@ -49,14 +50,9 @@ export default function HeroScene({ intro }: { intro?: string }) {
   return (
     <section ref={heroRef} id="hero" className="hero-scene relative isolate flex items-center overflow-hidden bg-[#0a2f23]">
       <div ref={imageRef} className="absolute inset-x-[-5%] bottom-[-4%] top-[-8%] will-change-transform">
-        <CrossfadeImages
+        <HeroImageCarousel
           images={communityHeroImages}
-          eagerFirst
-          quality={95}
           sizes="100vw"
-          intervalSeconds={5.5}
-          className="h-full w-full"
-          imageClassName="object-cover"
         />
       </div>
       <div className="photo-shade absolute inset-0" />

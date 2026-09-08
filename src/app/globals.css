@@ -268,6 +268,15 @@ section[id] { scroll-margin-top: 5.5rem; }
   opacity: 1;
 }
 
+.hero-image-layer {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.hero-image-layer:first-child {
+  opacity: 1;
+}
+
 @media (max-width: 640px) {
   :root {
     --section-padding-y: clamp(3.75rem, 16vw, 5rem);
@@ -290,6 +299,13 @@ section[id] { scroll-margin-top: 5.5rem; }
     opacity: 0;
   }
   .crossfade-image-layer:first-child {
+    opacity: 1;
+  }
+  .hero-image-layer {
+    opacity: 0;
+    transform: none !important;
+  }
+  .hero-image-layer:first-child {
     opacity: 1;
   }
 }
