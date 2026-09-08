@@ -16,16 +16,22 @@ export default function TrustMarquee({ children, reverse = false }: TrustMarquee
     const track = trackRef.current;
     if (!track) return;
 
-    gsap.set(track, { xPercent: reverse ? -50 : 0 });
-    const tween = gsap.to(track, {
-      xPercent: reverse ? 0 : -50,
-      duration: reverse ? 25 : 22,
-      ease: "none",
-      repeat: -1,
+    const media = gsap.matchMedia();
+    media.add("(min-width: 640px)", () => {
+      gsap.set(track, { xPercent: reverse ? -50 : 0 });
+      gsap.to(track, {
+        xPercent: reverse ? 0 : -50,
+        duration: reverse ? 25 : 22,
+        ease: "none",
+        repeat: -1,
+      });
+    });
+    media.add("(max-width: 639px)", () => {
+      gsap.set(track, { xPercent: 0 });
     });
 
     return () => {
-      tween.kill();
+      media.revert();
     };
   }, [reverse]);
 
